@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
 import { getDatabase, ref, set, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
-// CONFIGURAÇÃO DO SEU FIREBASE
 const firebaseConfig = {
     apiKey: "AIzaSyALgq-QhWX3Z27xaQcbAhGA0uaVso2Mmkw",
     authDomain: "treino-9dd2a.firebaseapp.com",
@@ -76,7 +75,6 @@ function normalizar(texto) {
     return texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
 }
 
-// CONTROLE DO MENU LATERAL HAMBÚRGUER
 window.toggleMenuLateral = () => {
     const menu = document.getElementById('menu-lateral');
     const overlay = document.getElementById('menu-overlay');
@@ -109,7 +107,6 @@ window.switchTab = (aba) => {
     renderizar();
 };
 
-// GERADOR DINÂMICO DE MENUS SEPARADOS (ADM vs ALUNA)
 function atualizarEstruturaMenuLateral() {
     const containerLinks = document.getElementById('links-menu-dinamico');
     if(!containerLinks) return;
@@ -209,7 +206,8 @@ function finalizarESalvarAnamnese() {
 window.fazerLogin = () => {
     const user = document.getElementById('input-usuario').value.trim();
     const pass = document.getElementById('input-senha').value;
-    if(user === "Admin" && pass === "2705") entrarNoApp("Rodrigo");
+    // ATUALIZADO: Nova senha master alterada para 147258
+    if(user === "Admin" && pass === "147258") entrarNoApp("Admin");
     else {
         const aluna = alunas.find(a => a.nome === user && a.senha === pass);
         if(aluna) {
@@ -475,17 +473,17 @@ window.salvarNaBiblioteca = () => {
     const nome = document.getElementById('lib-nome').value;
     const foto = document.getElementById('lib-foto').value || 'https://via.placeholder.com/300x200';
     const legenda = document.getElementById('lib-legenda').value;
-    const categoria = document.getElementById('lib-categoria').value;
+    const category = document.getElementById('lib-categoria').value;
     if(!nome) return alert("Digite o nome do exercício!");
 
     if(idEdicaoBiblioteca) {
-        update(ref(db, `biblioteca/${idEdicaoBiblioteca}`), { nome, foto, legenda, category: categoria, categoria }).then(() => {
+        update(ref(db, `biblioteca/${idEdicaoBiblioteca}`), { nome, foto, legenda, category, categoria: category }).then(() => {
             alert("Exercício atualizado com sucesso!");
             limparFormularioBiblioteca();
             switchTab('dados-treino');
         });
     } else {
-        push(ref(db, 'biblioteca/'), { nome, foto, legenda, categoria }).then(() => {
+        push(ref(db, 'biblioteca/'), { nome, foto, legenda, categoria: category, category }).then(() => {
             alert("Exercício salvo na biblioteca geral!");
             limparFormularioBiblioteca();
         });
@@ -502,7 +500,6 @@ window.limparFormularioBiblioteca = () => {
     document.getElementById('btn-cancelar-edit-lib').style.display = "none";
 };
 
-// NOVO: SISTEMA DE GESTÃO DE MÚSICA (GERENCIADO NO FIREBASE)
 window.salvarPlaylist = () => {
     const nome = document.getElementById('musica-nome-playlist').value.trim();
     const link = document.getElementById('musica-link-playlist').value.trim();
@@ -541,7 +538,6 @@ window.carregarPlaylistNoPlayer = (listId) => {
     `;
 };
 
-// ACIONADORES DE EDIÇÃO EXTERNAS VIA CARD OU TABELA
 window.prepararEdicaoAluna = (id) => {
     const aluna = alunas.find(a => a.id === id);
     if(!aluna) return;
@@ -645,7 +641,6 @@ function renderizar() {
     const container = document.getElementById('container-treinos');
     const hojeString = new Date().toLocaleDateString('pt-BR'); 
 
-    // Alimenta dinamicamente os seletores de playlist
     const selectPlaylist = document.getElementById('select-playlist-aluna');
     if(selectPlaylist) {
         const valorAtual = selectPlaylist.value;
@@ -886,7 +881,6 @@ function renderizar() {
                 </div>
             </div>`).join('');
 
-        // NOVO: Renderização das Playlists na área do administrador
         document.getElementById('lista-playlists-admin').innerHTML = playlists.map(p => `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
                 <span><i class="fas fa-music" style="color:#43a047; margin-right:8px;"></i>${p.nome}</span>
@@ -908,7 +902,6 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
-// MAPEAMENTO DE FUNÇÕES PARA ESCOPO GLOBAL DO NAVEGADOR
 window.toggleMenuLateral = toggleMenuLateral;
 window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
 window.limparFormularioAluna = limparFormularioAluna;
