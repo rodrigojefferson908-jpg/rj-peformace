@@ -209,7 +209,7 @@ function finalizarESalvarAnamnese() {
 window.fazerLogin = () => {
     const user = document.getElementById('input-usuario').value.trim();
     const pass = document.getElementById('input-senha').value;
-    if(user === "Rodrigo" && pass === "2705") entrarNoApp("Treinador");
+    if(user === "Rodrigo" && pass === "2727") entrarNoApp("Treinador");
     else {
         const aluna = alunas.find(a => a.nome === user && a.senha === pass);
         if(aluna) {
