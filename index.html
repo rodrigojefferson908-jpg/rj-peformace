@@ -1,0 +1,375 @@
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RJ PERFORMANCE | Gestão de Treinos Profissional</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+    <div id="tela-login" class="flex-center">
+        <div class="login-box card-verde">   
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijwc7AbCzxGI9_KIBSzHTxjwwMRUq_XTRAgcQy3ZSySyR3s963VTFwy-Peto86yIQwvMYxh0AvEpgkyOOm6GVBNbLVWfarRsxO5VSlA9LgTqo9cBQtsGq1p5ZkaA2q6KhMME0_5qkU_N2Ro8OKlDyRgPRrFelDbNX-_YQ5kgWcBDScSupsA9CswgnCb0w/s1024/1770938687957.png" alt="RJ Performance" class="logo-site logo-login">
+            <p>Seu Treino, Seu Resultado</p>
+            
+            <div class="input-group">
+                <input type="text" id="input-usuario" placeholder="Nome de usuário">
+            </div>
+            
+            <div class="input-group">
+                <input type="password" id="input-senha" placeholder="Sua senha">
+                <i class="fas fa-eye" id="toggleSenha" onclick="toggleSenhaVisualizacao()"></i>
+            </div>
+            
+            <button onclick="fazerLogin()" class="btn-principal">Entrar</button>
+        </div>
+    </div>
+
+    <div id="tela-anamnese" class="flex-center" style="display:none; padding: 20px 0;">
+        <div class="login-box card-verde" style="max-width: 500px; text-align: left;">
+            <h2 style="text-align: center; color: #43a047 !important;">Anamnese Inicial</h2>
+            <p id="progresso-anamnese" style="text-align: center; color: #a5d6a7 !important; font-size: 0.85rem; margin-bottom: 15px;">Passo 1 de 10</p>
+            
+            <form id="form-anamnese" onsubmit="event.preventDefault();">
+                <div class="passo-anamnese" id="passo-1">
+                    <h3>1. Identificação</h3>
+                    <input type="text" id="ana-nome" placeholder="Nome completo" required>
+                    <label style="color:white; font-size:0.8rem;">Data de Nascimento:</label>
+                    <input type="date" id="ana-nasc" required>
+                    <input type="number" id="ana-idade" placeholder="Idade" required>
+                    <select id="ana-sexo" required>
+                        <option value="">Selecione o Sexo</option>
+                        <option value="Feminino">Feminino</option>
+                        <option value="Masculino">Masculino</option>
+                    </select>
+                    <input type="text" id="ana-altura" placeholder="Altura (ex: 1.65)" required>
+                    <input type="text" id="ana-peso" placeholder="Peso (ex: 65.2)" required>
+                    <input type="tel" id="ana-tel" placeholder="Telefone" required>
+                    <input type="email" id="ana-email" placeholder="E-mail" required>
+                    <input type="text" id="ana-profissao" placeholder="Profissão" required>
+                </div>
+
+                <div class="passo-anamnese" id="passo-2" style="display:none;">
+                    <h3>2. Objetivos</h3>
+                    <label style="color:white; display:block; margin-bottom:8px;">Qual é seu principal objetivo?</label>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Emagrecimento"> Emagrecimento</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Hipertrofia"> Ganho de massa muscular (Hipertrofia)</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Condicionamento"> Condicionamento físico</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Saúde"> Saúde e qualidade de vida</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Reabilitação"> Reabilitação</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Performance"> Performance esportiva</div>
+                    <div class="check-group"><input type="checkbox" name="ana-obj" value="Dores"> Redução de dores</div>
+                    <input type="text" id="ana-obj-outro" placeholder="Outro objetivo...">
+                    <input type="text" id="ana-prazo" placeholder="Prazo esperado para atingir esse objetivo">
+                </div>
+
+                <div class="passo-anamnese" id="passo-3" style="display:none;">
+                    <h3>3. Histórico de Atividade Física</h3>
+                    <label style="color:white;">Você pratica atividade física atualmente?</label>
+                    <select id="ana-pratica-atual" onchange="toggleCamposAnamnese('campos-pratica-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-pratica-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <input type="text" id="ana-modalidade" placeholder="Qual modalidade?">
+                        <input type="text" id="ana-tempo-pratica" placeholder="Há quanto tempo?">
+                        <input type="text" id="ana-frequencia" placeholder="Frequência semanal?">
+                        <input type="text" id="ana-duracao" placeholder="Duração dos treinos?">
+                    </div>
+                    <label style="color:white; margin-top:10px; display:block;">Já praticou atividade física regularmente anteriormente?</label>
+                    <select id="ana-pratica-anterior" onchange="toggleCamposAnamnese('campos-pratica-ant', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-pratica-ant" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <input type="text" id="ana-quais-anteriores" placeholder="Qual(is)?">
+                    </div>
+                </div>
+
+                <div class="passo-anamnese" id="passo-4" style="display:none;">
+                    <h3>4. Histórico Médico</h3>
+                    <label style="color:white;">Possui alguma doença diagnosticada?</label>
+                    <select id="ana-doenca" onchange="toggleCamposAnamnese('campos-doenca-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-doenca-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Hipertensão"> Hipertensão</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Diabetes"> Diabetes</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Colesterol alto"> Colesterol alto</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Problemas cardíacos"> Problemas cardíacos</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Problemas respiratórios"> Problemas respiratórios</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Problemas renais"> Problemas renais</div>
+                        <div class="check-group"><input type="checkbox" name="ana-doencas-lista" value="Problemas hormonais"> Problemas hormonais</div>
+                        <input type="text" id="ana-doenca-outra" placeholder="Outra doença...">
+                    </div>
+                    <label style="color:white; margin-top:10px; display:block;">Já realizou alguma cirurgia?</label>
+                    <select id="ana-cirurgia" onchange="toggleCamposAnamnese('campos-cirurgia-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-cirurgia-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <input type="text" id="ana-cirurgia-qual" placeholder="Qual cirurgia?">
+                        <input type="text" id="ana-cirurgia-quando" placeholder="Quando realizada?">
+                    </div>
+                </div>
+
+                <div class="passo-anamnese" id="passo-5" style="display:none;">
+                    <h3>5. Saúde Cardiovascular (PAR-Q)</h3>
+                    <label style="color:white;">Seu médico já informou que você possui algum problem cardíaco?</label>
+                    <select id="parq-1"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                    <label style="color:white;">Sente dor ou desconforto no peito durante exercícios?</label>
+                    <select id="parq-2"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                    <label style="color:white;">Já sentiu tontura, desmaio ou falta de ar excessiva?</label>
+                    <select id="parq-3"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                    <label style="color:white;">Possui pressão alta?</label>
+                    <select id="parq-4"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                    <label style="color:white;">Utiliza medicamentos para pressão ou coração?</label>
+                    <select id="parq-5"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                    <label style="color:white;">Existe alguma recomendação médica que limite exercícios?</label>
+                    <select id="parq-6"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+
+                <div class="passo-anamnese" id="passo-6" style="display:none;">
+                    <h3>6. Lesões e Limitações</h3>
+                    <label style="color:white;">Possui ou já teve lesões?</label>
+                    <select id="ana-lesao" onchange="toggleCamposAnamnese('campos-lesao-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-lesao-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <label style="color:white;">Local da lesão:</label>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Ombro"> Ombro</div>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Cervical"> Cervical</div>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Lombar"> Lombar</div>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Quadril"> Quadril</div>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Joelho"> Joelho</div>
+                        <div class="check-group"><input type="checkbox" name="ana-lesao-local" value="Tornozelo"> Tornozelo</div>
+                        <input type="text" id="ana-lesao-outro" placeholder="Outro local...">
+                    </div>
+                    <label style="color:white; margin-top:10px; display:block;">Sente dor atualmente?</label>
+                    <select id="ana-dor-atual" onchange="toggleCamposAnamnese('campos-dor-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option>
+                        <option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-dor-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <label style="color:white;">Escala de dor (0 a 10):</label>
+                        <select id="ana-dor-escala">
+                            <option value="0">0</option><option value="1">1</option><option value="2">2</option><option value="3">3</option><option value="4">4</option><option value="5">5</option><option value="6">6</option><option value="7">7</option><option value="8">8</option><option value="9">9</option><option value="10">10</option>
+                        </select>
+                        <label style="color:white;">Existe algum movimento que provoque dor?</label>
+                        <select id="ana-movimento-dor" onchange="toggleCamposAnamnese('campos-mov-dor', this.value === 'Sim')">
+                            <option value="Não">Não</option><option value="Sim">Sim</option>
+                        </select>
+                        <div id="campos-mov-dor" style="display:none;"><input type="text" id="ana-movimento-qual" placeholder="Qual movimento?"></div>
+                    </div>
+                </div>
+
+                <div class="passo-anamnese" id="passo-7" style="display:none;">
+                    <h3>7. Uso de Medicamentos e Suplementos</h3>
+                    <label style="color:white;">Utiliza medicamentos continuamente?</label>
+                    <select id="ana-med-continuo" onchange="toggleCamposAnamnese('campos-med-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option><option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-med-sim" style="display:none;"><input type="text" id="ana-med-quais" placeholder="Quais?"></div>
+                    
+                    <label style="color:white; margin-top:10px; display:block;">Utiliza suplementos?</label>
+                    <select id="ana-suple" onchange="toggleCamposAnamnese('campos-suple-sim', this.value === 'Sim')">
+                        <option value="Não">Não</option><option value="Sim">Sim</option>
+                    </select>
+                    <div id="campos-suple-sim" style="display:none; border-left: 2px solid #43a047; padding-left: 10px;">
+                        <div class="check-group"><input type="checkbox" name="ana-suple-lista" value="Whey Protein"> Whey Protein</div>
+                        <div class="check-group"><input type="checkbox" name="ana-suple-lista" value="Creatina"> Creatina</div>
+                        <div class="check-group"><input type="checkbox" name="ana-suple-lista" value="Multivitamínico"> Multivitamínico</div>
+                        <div class="check-group"><input type="checkbox" name="ana-suple-lista" value="Pré-treino"> Pré-treino</div>
+                        <input type="text" id="ana-suple-outro" placeholder="Outro suplemento...">
+                    </div>
+                </div>
+
+                <div class="passo-anamnese" id="passo-8" style="display:none;">
+                    <h3>8. Alimentação</h3>
+                    <label style="color:white;">Possui acompanhamento nutricional?</label>
+                    <select id="ana-nutri"><option value="Não">Não</option><option value="Sim">Sim</option></select>
+                </div>
+
+                <div class="passo-anamnese" id="passo-9" style="display:none;">
+                    <h3>9. Disponibilidade para Treinos</h3>
+                    <label style="color:white;">Quantos dias por semana pode treinar?</label>
+                    <select id="ana-disp-dias">
+                        <option value="2 dias">2 dias</option><option value="3 dias">3 dias</option><option value="4 dias">4 dias</option><option value="5 dias">5 dias</option><option value="6 ou mais dias">6 ou mais dias</option>
+                    </select>
+                    <label style="color:white;">Tempo disponível por sessão:</label>
+                    <select id="ana-disp-tempo">
+                        <option value="30 minutos">30 minutos</option><option value="45 minutos">45 minutos</option><option value="60 minutos">60 minutes</option><option value="90 minutos ou mais">90 minutos ou mais</option>
+                    </select>
+                    <label style="color:white;">Onde pretende treinar?</label>
+                    <select id="ana-disp-local">
+                        <option value="Academia">Academia</option><option value="Casa">Casa</option><option value="Condomínio">Condomínio</option><option value="Ar livre">Ar livre</option>
+                    </select>
+                </div>
+
+                <div class="passo-anamnese" id="passo-10" style="display:none;">
+                    <h3>10. Declaração e Consentimento</h3>
+                    <div class="check-group"><input type="checkbox" id="consent-1" required> Declaro que as informações fornecidas são verdadeiras.</div>
+                    <div class="check-group"><input type="checkbox" id="consent-2" required> Estou ciente de que devo informar qualquer alteração no meu estado de saúde.</div>
+                    <div class="check-group"><input type="checkbox" id="consent-3" required> Autorizo a utilização das informações para elaboração e personalização do meu plano de treinamento.</div>
+                    <div class="check-group"><input type="checkbox" id="consent-4" required> Concordo com os termos e condições da plataforma.</div>
+                    <label style="color:white; margin-top:10px; display:block;">Data de Assinatura:</label>
+                    <input type="date" id="ana-data-envio" required>
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button type="button" id="btn-ana-voltar" onclick="navegarAnamnese(-1)" class="btn-principal" style="background:#666 !important; display:none;">Voltar</button>
+                    <button type="button" id="btn-ana-avancar" onclick="navegarAnamnese(1)" class="btn-principal">Avançar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="app" style="display:none;">
+        <header class="header-moderno">
+            <button onclick="toggleMenuLateral()" class="btn-menu" id="btn-hamburguer">
+                <i class="fas fa-bars"></i>
+            </button>
+            <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijwc7AbCzxGI9_KIBSzHTxjwwMRUq_XTRAgcQy3ZSySyR3s963VTFwy-Peto86yIQwvMYxh0AvEpgkyOOm6GVBNbLVWfarRsxO5VSlA9LgTqo9cBQtsGq1p5ZkaA2q6KhMME0_5qkU_N2Ro8OKlDyRgPRrFelDbNX-_YQ5kgWcBDScSupsA9CswgnCb0w/s1024/1770938687957.png" alt="RJ Performance" class="logo-site logo-principal">
+            <h2 id="boas-vindas"></h2>
+            <div style="width: 38px;"></div> </header>
+
+        <nav id="menu-lateral" class="menu-lateral">
+            <div class="menu-header">
+                <h3>Menu de Opções</h3>
+                <span class="fechar-menu" onclick="toggleMenuLateral()">&times;</span>
+            </div>
+            
+            <div id="links-menu-dinamico"></div>
+        </nav>
+        
+        <div id="menu-overlay" class="menu-overlay" onclick="toggleMenuLateral()"></div>
+
+        <main class="container">
+            <div id="avisos-admin" class="card-verde" style="display:none; border-left: 5px solid #2e7d32; border-radius: 12px; margin: 15px auto; width: 95%;">
+                <h3 style="color: #1b5e20; margin-bottom: 10px;">
+                    <i class="fas fa-bell"></i> Atividades Recentes
+                </h3>
+                <div id="lista-avisos" style="max-height: 150px; overflow-y: auto; font-size: 0.9rem;"></div>
+            </div>
+
+            <section id="aba-lista" class="tab-content">
+                <div id="sub-tela-alunas" class="card-verde" style="display:none;">
+                    <h3 style="margin-bottom: 15px;"><i class="fas fa-users"></i> Selecione uma Aluna</h3>
+                    <div id="lista-fluxo-alunas" class="lista-admin"></div>
+                </div>
+
+                <div id="sub-tela-treinos" class="card-verde" style="display:none;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3><i class="fas fa-dumbbell"></i> Treinos Cadastrados</h3>
+                        <button onclick="voltarParaAlunas()" class="btn-principal" style="width: auto; padding: 5px 15px; background: #666;">Voltar</button>
+                    </div>
+                    <div id="lista-fluxo-treinos" class="lista-admin"></div>
+                </div>
+
+                <div id="sub-tela-exercicios" style="display:none;">
+                    <div style="padding: 0 10px; margin-bottom: 10px;" id="container-botao-voltar-exercicios"></div>
+                    <div id="container-treinos" class="container-flexbox-vertical"></div>
+                </div>
+            </section>
+
+            <section id="aba-fichas" class="tab-content" style="display:none;">
+                <h2 style="margin: 20px; color: white; text-align: center;">Fichas Pessoais</h2>
+                <div id="container-fichas" class="grid-moderno"></div>
+            </section>
+
+            <section id="aba-designar" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-tasks"></i> Designar Treinos</h3>
+                    <select id="select-aluna-vinculo">
+                        <option value="">Selecione a aluna...</option>
+                    </select>
+                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Data Programada para o Treino:</label>
+                    <input type="date" id="data-treino-vinculo" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
+                    <div id="lista-selecao-multipla" class="lista-multipla"></div>
+                    <button onclick="vincularTreinosSelecionados()" class="btn-principal">Enviar para Rotina</button>
+                </div>
+            </section>
+
+            <section id="aba-cadastro" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3 id="titulo-cad-aluna"><i class="fas fa-user-plus"></i> Cadastrar Nova Aluna</h3>
+                    <input type="text" id="cad-nome-aluna" placeholder="Nome da Aluna">
+                    <input type="password" id="cad-senha-aluna" placeholder="Senha de Acesso">
+                    <input type="text" id="cad-foto-aluna" placeholder="Link da Foto da Aluna">
+                    <textarea id="cad-info-aluna" placeholder="Observações (Objetivo, restrições, etc.)" rows="3"></textarea>
+                    <button id="btn-salvar-aluna" onclick="cadastrarAluna()" class="btn-principal">Salvar Cadastro</button>
+                    <button id="btn-cancelar-edit-aluna" onclick="limparFormularioAluna()" class="btn-principal" style="background:#666 !important; margin-top:10px; display:none;">Cancelar Edição</button>
+                </div>
+            </section>
+
+            <section id="aba-criar-treino" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3 id="titulo-lib-exercicio"><i class="fas fa-dumbbell"></i> Criar Exercício</h3>
+                    <input type="text" id="lib-nome" placeholder="Nome do Exercício">
+                    <input type="text" id="lib-foto" placeholder="Link da Imagem/GIF">
+                    <textarea id="lib-legenda" placeholder="Legenda (Como executar?)" rows="2"></textarea>
+                    <select id="lib-categoria">
+                        <option value="Aquecimento">Aquecimento</option>
+                        <option value="Cardio">Cárdio</option>
+                        <option value="Superiores">Superiores</option>
+                        <option value="Inferiores">Inferiores</option>
+                        <option value="Core">Core</option>
+                        <option value="Alongamento">Alongamento/Mobilidade</option>
+                    </select>
+                    <button id="btn-salvar-lib" onclick="salvarNaBiblioteca()" class="btn-principal">Salvar na Biblioteca</button>
+                    <button id="btn-cancelar-edit-lib" onclick="limparFormularioBiblioteca()" class="btn-principal" style="background:#666 !important; margin-top:10px; display:none;">Cancelar Edição</button>
+                </div>
+            </section>
+
+            <section id="aba-dados-treino" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-edit"></i> Gerenciar Biblioteca de Exercícios</h3>
+                    <p style="color:#a5d6a7; font-size:0.8rem; margin-bottom:15px; text-align:left;">Edite ou remova exercícios salvos no banco de dados geral abaixo:</p>
+                    <div id="lista-admin-biblioteca" class="lista-admin"></div>
+                </div>
+            </section>
+
+            <section id="aba-musicas" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-music"></i> Músicas para o Treino</h3>
+                    <p style="color:#a5d6a7; font-size:0.85rem; margin-bottom:15px; text-align:center;">
+                        Selecione uma playlist.
+                    </p>
+                    <select id="select-playlist-aluna" class="select-ferramenta" onchange="carregarPlaylistNoPlayer(this.value)">
+                        <option value="">Selecione uma playlist...</option>
+                    </select>
+                    <div id="container-player-musica" style="margin-top: 15px; border-radius: 12px; overflow: hidden; background: #1a1a1a;"></div>
+                </div>
+            </section>
+
+            <section id="aba-gerenciar-musicas" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-sliders-h"></i> Gerenciamento de Músicas</h3>
+                    <input type="text" id="musica-nome-playlist" placeholder="Nome da Playlist (Ex: Treino HIIT Insano)">
+                    <input type="text" id="musica-link-playlist" placeholder="Link da Playlist do YouTube ou YT Music">
+                    <button onclick="salvarPlaylist()" class="btn-principal">Cadastrar Playlist</button>
+                    
+                    <h3 style="margin-top: 25px; margin-bottom: 10px; font-size:1.1rem;"><i class="fas fa-list"></i> Playlists Cadastradas</h3>
+                    <div id="lista-playlists-admin" class="lista-admin"></div>
+                </div>
+            </section>
+
+        </main>
+    </div>
+  
+    <div id="modal-exercicio" class="modal-overlay" onclick="fecharModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="fecharModal()">&times;</span>
+            <img id="modal-img" src="">
+            <h3 id="modal-titulo"></h3>
+            <p id="modal-legenda"></p>
+            <div id="modal-horarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85rem; text-align: left;"></div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
