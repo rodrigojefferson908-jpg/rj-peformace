@@ -52,7 +52,7 @@
 
                 <div class="passo-anamnese" id="passo-2" style="display:none;">
                     <h3>2. Objetivos</h3>
-                    <label style="color:white; display:block; margin-bottom:8px;">Qual é seu principal objetivo?</label>
+                    <label style="color:white; display:block; margin-bottom:8px;">Qual é seu principal objective?</label>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Emagrecimento"> Emagrecimento</div>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Hipertrofia"> Ganho de massa muscular (Hipertrofia)</div>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Condicionamento"> Condicionamento físico</div>
@@ -201,7 +201,7 @@
                     </select>
                     <label style="color:white;">Tempo disponível por sessão:</label>
                     <select id="ana-disp-tempo">
-                        <option value="30 minutos">30 minutos</option><option value="45 minutos">45 minutos</option><option value="60 minutos">60 minutes</option><option value="90 minutos ou mais">90 minutos ou mais</option>
+                        <option value="30 minutos">30 minutos</option><option value="45 minutos">45 minutos</option><option value="60 minutos">60 minutos</option><option value="90 minutos ou mais">90 minutos ou mais</option>
                     </select>
                     <label style="color:white;">Onde pretende treinar?</label>
                     <select id="ana-disp-local">
@@ -234,7 +234,8 @@
             </button>
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijwc7AbCzxGI9_KIBSzHTxjwwMRUq_XTRAgcQy3ZSySyR3s963VTFwy-Peto86yIQwvMYxh0AvEpgkyOOm6GVBNbLVWfarRsxO5VSlA9LgTqo9cBQtsGq1p5ZkaA2q6KhMME0_5qkU_N2Ro8OKlDyRgPRrFelDbNX-_YQ5kgWcBDScSupsA9CswgnCb0w/s1024/1770938687957.png" alt="RJ Performance" class="logo-site logo-principal">
             <h2 id="boas-vindas"></h2>
-            <div style="width: 38px;"></div> </header>
+            <div style="width: 38px;"></div>
+        </header>
 
         <nav id="menu-lateral" class="menu-lateral">
             <div class="menu-header">
@@ -332,11 +333,27 @@
                 </div>
             </section>
 
+            <section id="aba-cadastro-treinador" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-user-shield"></i> Cadastrar Novo Treinador</h3>
+                    <input type="text" id="cad-nome-treinador" placeholder="Nome do Treinador">
+                    <input type="password" id="cad-senha-treinador" placeholder="Senha do Treinador">
+                    <button onclick="cadastrarTreinador()" class="btn-principal">Salvar Treinador</button>
+                </div>
+            </section>
+
+            <section id="aba-dados-treinador" class="tab-content" style="display:none;">
+                <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
+                    <h3><i class="fas fa-users-cog"></i> Gerenciar Treinadores</h3>
+                    <div id="lista-admin-treinadores" class="lista-admin"></div>
+                </div>
+            </section>
+
             <section id="aba-musicas" class="tab-content" style="display:none;">
                 <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
                     <h3><i class="fas fa-music"></i> Músicas para o Treino</h3>
                     <p style="color:#a5d6a7; font-size:0.85rem; margin-bottom:15px; text-align:center;">
-                        Selecione uma playlist.
+                        Selecione uma playlist cadastrada e use o botão de menu interno do player para escolher faixas.
                     </p>
                     <select id="select-playlist-aluna" class="select-ferramenta" onchange="carregarPlaylistNoPlayer(this.value)">
                         <option value="">Selecione uma playlist...</option>
