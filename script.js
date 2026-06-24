@@ -42,7 +42,7 @@ function dispararSomBuzina() {
     }
 }
 
-let biblioteca = [], alunas = [], treinosDesignados = [], playlists = [], usuarioLogado = "";
+let biblioteca = [], alunas = [], treinosDesignados = [], playlists = [], treinadores = [], usuarioLogado = "", tipoUsuarioLogado = "";
 let idEdicaoAluna = null;
 let idEdicaoBiblioteca = null;
 let alunaSelecionadaFluxo = "";
@@ -94,7 +94,7 @@ window.switchTab = (aba) => {
     const btnMenu = document.getElementById(`btn-menu-${aba}`);
     if(btnMenu) btnMenu.classList.add('active');
 
-    if(aba === 'lista' && usuarioLogado === "Admin") { 
+    if(aba === 'lista' && tipoUsuarioLogado === "Treinador") { 
         alunaSelecionadaFluxo = ""; 
     }
     
@@ -111,21 +111,29 @@ function atualizarEstruturaMenuLateral() {
     const containerLinks = document.getElementById('links-menu-dinamico');
     if(!containerLinks) return;
 
-    if(usuarioLogado === "Admin") {
+    if(tipoUsuarioLogado === "Admin") {
+        containerLinks.innerHTML = `
+            <button onclick="switchTab('criar-treino')" id="btn-menu-criar-treino" class="menu-item active"><i class="fas fa-plus-circle"></i> Criar Treino</button>
+            <button onclick="switchTab('dados-treino')" id="btn-menu-dados-treino" class="menu-item"><i class="fas fa-database"></i> Dados de Treino</button>
+            <button onclick="switchTab('cadastro-treinador')" id="btn-menu-cadastro-treinador" class="menu-item"><i class="fas fa-user-shield"></i> Cadastrar Treinador</button>
+            <button onclick="switchTab('dados-treinador')" id="btn-menu-dados-treinador" class="menu-item"><i class="fas fa-users-cog"></i> Dados de Treinador</button>
+            <button onclick="logout()" class="menu-item menu-item-sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
+        `;
+    } else if(tipoUsuarioLogado === "Treinador") {
         containerLinks.innerHTML = `
             <button onclick="switchTab('lista')" id="btn-menu-lista" class="menu-item active"><i class="fas fa-home"></i> Início</button>
-            <button onclick="switchTab('fichas')" id="btn-menu-fichas" class="menu-item"><i class="fas fa-address-book"></i> Fichas das Alunas</button>
+            <button onclick="switchTab('fichas')" id="btn-menu-fichas" class="menu-item"><i class="fas fa-address-book"></i> Ficha da Aluna</button>
             <button onclick="switchTab('designar')" id="btn-menu-designar" class="menu-item"><i class="fas fa-tasks"></i> Designar Treino</button>
-            <button onclick="switchTab('cadastro')" id="btn-menu-cadastro" class="menu-item"><i class="fas fa-user-plus"></i> Cadastro de Aluna</button>
-            <button onclick="switchTab('criar-treino')" id="btn-menu-criar-treino" class="menu-item"><i class="fas fa-plus-circle"></i> Criar Treino</button>
-            <button onclick="switchTab('dados-treino')" id="btn-menu-dados-treino" class="menu-item"><i class="fas fa-database"></i> Dados de Treino</button>
-            <button onclick="switchTab('gerenciar-musicas')" id="btn-menu-gerenciar-musicas" class="menu-item"><i class="fas fa-music"></i> Gerenciar Música</button>
+            <button onclick="switchTab('cadastro')" id="btn-menu-cadastro" class="menu-item"><i class="fas fa-user-plus"></i> Cadastrar Nova Aluna</button>
+            <button onclick="switchTab('musicas')" id="btn-menu-musicas" class="menu-item"><i class="fas fa-music"></i> Músicas</button>
+            <button onclick="switchTab('gerenciar-musicas')" id="btn-menu-gerenciar-musicas" class="menu-item"><i class="fas fa-sliders-h"></i> Gerenciar Música</button>
             <button onclick="logout()" class="menu-item menu-item-sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
         `;
     } else {
         containerLinks.innerHTML = `
             <button onclick="switchTab('lista')" id="btn-menu-lista" class="menu-item active"><i class="fas fa-home"></i> Início</button>
             <button onclick="switchTab('musicas')" id="btn-menu-musicas" class="menu-item"><i class="fas fa-music"></i> Músicas</button>
+            <button onclick="switchTab('gerenciar-musicas')" id="btn-menu-gerenciar-musicas" class="menu-item"><i class="fas fa-sliders-h"></i> Gerenciar Música</button>
             <button onclick="logout()" class="menu-item menu-item-sair"><i class="fas fa-sign-out-alt"></i> Sair</button>
         `;
     }
@@ -206,12 +214,20 @@ function finalizarESalvarAnamnese() {
 window.fazerLogin = () => {
     const user = document.getElementById('input-usuario').value.trim();
     const pass = document.getElementById('input-senha').value;
-    // ATUALIZADO: Nova senha master alterada para 147258
-    if(user === "Admin" && pass === "147258") entrarNoApp("Admin");
-    else {
+    
+    if(user === "Admin" && pass === "147258") {
+        entrarNoApp("Admin", "Admin");
+    } else {
+        const treinador = treinadores.find(t => t.nome === user && t.senha === pass);
+        if(treinador) {
+            entrarNoApp(treinador.nome, "Treinador");
+            return;
+        }
+
         const aluna = alunas.find(a => a.nome === user && a.senha === pass);
         if(aluna) {
             usuarioLogado = aluna.nome;
+            tipoUsuarioLogado = "Aluna";
             if (!aluna.anamnese) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('tela-anamnese').style.display = 'flex';
@@ -223,30 +239,36 @@ window.fazerLogin = () => {
                 document.getElementById('progresso-anamnese').innerText = `Passo 1 de 10`;
                 document.getElementById('form-anamnese').reset();
             } else {
-                entrarNoApp(aluna.nome);
+                entrarNoApp(aluna.nome, "Aluna");
             }
+        } else {
+            alert("Usuário ou senha incorretos!");
         }
-        else alert("Usuário ou senha incorretos!");
     }
 };
 
-function entrarNoApp(nome) {
+function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
+    tipoUsuarioLogado = tipo;
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('app').style.display = 'block';
     
-    const isAdmin = nome === "Admin";
-    document.getElementById('avisos-admin').style.display = isAdmin ? "block" : "none";
+    document.getElementById('avisos-admin').style.display = tipo === "Treinador" ? "block" : "none";
     document.getElementById('boas-vindas').innerText = `Olá, ${nome}`;
     alunaSelecionadaFluxo = "";
     
     atualizarEstruturaMenuLateral();
-    switchTab('lista');
+    if(tipo === "Admin") {
+        switchTab('criar-treino');
+    } else {
+        switchTab('lista');
+    }
 }
 
 window.logout = function() {
     usuarioLogado = "";
+    tipoUsuarioLogado = "";
     document.getElementById('app').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
@@ -437,6 +459,18 @@ window.iniciarMetronomo = () => {
 window.pausarMetronomo = () => { clearInterval(metronomoInterval); metronomoInterval = null; };
 window.resetarMetronomo = () => { clearInterval(metronomoInterval); metronomoInterval = null; const visual = document.getElementById('metro-visual'); if(visual) { visual.style.background = "#1a1a1a"; visual.style.borderColor = "#43a047"; } };
 
+window.cadastrarTreinador = () => {
+    const nome = document.getElementById('cad-nome-treinador').value.trim();
+    const senha = document.getElementById('cad-senha-treinador').value.trim();
+    if(!nome || !senha) return alert("Preencha o nome e a senha do treinador!");
+    
+    push(ref(db, 'treinadores/'), { nome, senha }).then(() => {
+        alert("Novo treinador cadastrado com sucesso!");
+        document.getElementById('cad-nome-treinador').value = "";
+        document.getElementById('cad-senha-treinador').value = "";
+    });
+};
+
 window.cadastrarAluna = () => {
     const nome = document.getElementById('cad-nome-aluna').value.trim();
     const senha = document.getElementById('cad-senha-aluna').value.trim();
@@ -451,7 +485,8 @@ window.cadastrarAluna = () => {
             switchTab('fichas');
         });
     } else {
-        push(ref(db, 'alunas/'), { nome, senha, foto, info }).then(() => {
+        const idTreinador = usuarioLogado; 
+        push(ref(db, 'alunas/'), { nome, senha, foto, info, idTreinador }).then(() => {
             alert("Nova aluna cadastrada!");
             limparFormularioAluna();
         });
@@ -509,7 +544,7 @@ window.salvarPlaylist = () => {
     if(link.includes("list=")) {
         listId = link.split("list=")[1].split("&")[0];
     } else {
-        return alert("Link inválido! Certifique-se de copiar o link completo de uma playlist válida contendo 'list='.");
+        return alert("Link inválido! Certifique-se de copiar o link completo contendo 'list='.");
     }
 
     push(ref(db, 'playlists/'), { nome, listId }).then(() => {
@@ -611,6 +646,7 @@ onValue(ref(db, '/'), (snapshot) => {
     alunas = data?.alunas ? Object.entries(data.alunas).map(([id, v]) => ({...v, id})) : [];
     treinosDesignados = data?.treinosDesignados ? Object.entries(data.treinosDesignados).map(([id, v]) => ({...v, idVinculo: id})) : [];
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
+    treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     renderizar();
 });
 
@@ -627,14 +663,16 @@ window.vincularTreinosSelecionados = () => {
         const id = cb.dataset.id; const ex = biblioteca.find(e => e.id === id);
         push(ref(db, 'treinosDesignados/'), {
             ...ex, aluna: nomeAluna, iniciado: false, concluido: false, dataProgramada: dataFormatada, ordem: maiorOrdem + index + 1,
-            detalhes: `${document.getElementById(`series-${id}`).value || 3}x${document.getElementById(`reps-${id}`).value || 12}`
+            detalhes: `${document.getElementById(`series-${id}`).value || 3}x${document.getElementById(`reps-${id}`).value || 12}`,
+            idTreinador: usuarioLogado
         });
     });
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
 
 function renderizar() {
-    const isAdmin = usuarioLogado === "Admin";
+    const isAdmin = tipoUsuarioLogado === "Admin";
+    const isTreinador = tipoUsuarioLogado === "Treinador";
     const subTelaAlunas = document.getElementById('sub-tela-alunas');
     const subTelaTreinos = document.getElementById('sub-tela-treinos');
     const subTelaExercicios = document.getElementById('sub-tela-exercicios');
@@ -650,18 +688,20 @@ function renderizar() {
     }
 
     let filtrados = [];
-    if (isAdmin) {
+    let alunasDoTreinador = isTreinador ? alunas.filter(a => a.idTreinador === usuarioLogado) : alunas;
+
+    if (isTreinador) {
         if(subTelaAlunas) subTelaAlunas.style.display = "none";
         if(subTelaTreinos) subTelaTreinos.style.display = "none";
         if(subTelaExercicios) subTelaExercicios.style.display = "none";
         if (!alunaSelecionadaFluxo) {
             if(subTelaAlunas) subTelaAlunas.style.display = "block";
-            document.getElementById('lista-fluxo-alunas').innerHTML = alunas.map(a => `
+            document.getElementById('lista-fluxo-alunas').innerHTML = alunasDoTreinador.map(a => `
                 <div onclick="selecionarAlunaFluxo('${a.nome}')" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
                     <span><i class="fas fa-user"></i> ${a.nome}</span>
                     <i class="fas fa-chevron-right" style="color: #43a047;"></i>
                 </div>
-            `).join('') || "<div style='color: white; padding: 10px;'>Nenhuma aluna cadastrada.</div>";
+            `).join('') || "<div style='color: white; padding: 10px;'>Nenhuma aluna vinculada a você.</div>";
             return;
         } else {
             if(subTelaExercicios) subTelaExercicios.style.display = "block";
@@ -670,7 +710,7 @@ function renderizar() {
             `;
             filtrados = treinosDesignados.filter(t => t.aluna === alunaSelecionadaFluxo);
         }
-    } else {
+    } else if (tipoUsuarioLogado === "Aluna") {
         if(subTelaAlunas) subTelaAlunas.style.display = "none";
         if(subTelaTreinos) subTelaTreinos.style.display = "none";
         if(subTelaExercicios) subTelaExercicios.style.display = "block";
@@ -678,7 +718,7 @@ function renderizar() {
     }
 
     let htmlTopo = "";
-    if (!isAdmin && usuarioLogado !== "") {
+    if (tipoUsuarioLogado === "Aluna" || isTreinador) {
         const concluidos = filtrados.filter(t => t.concluido).length;
         const porc = filtrados.length > 0 ? Math.round((concluidos / filtrados.length) * 100) : 0;
         let interfaceFerramentaSelecionada = "";
@@ -745,13 +785,14 @@ function renderizar() {
 
         htmlTopo = `
     <div class="card-verde" id="card-ferramentas-aluna" style="text-align: center; width: 100%; border-radius:0px; margin-bottom:15px;">
-        <div style="color: #43a047; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"><i class="fas fa-calendar-day"></i> Treino de Hoje (${hojeString})</div>
+        <div style="color: #43a047; font-weight: bold; font-size: 1.1rem; margin-bottom: 10px;"><i class="fas fa-clock"></i> Painel de Cronometragem e Métricas</div>
         
+        ${tipoUsuarioLogado === "Aluna" ? `
         <h3 style="font-size: 0.8rem; margin-bottom: 5px; margin-top: 5px;">Progresso de Hoje: ${porc}%</h3>
         <div style="background: #eee; border-radius: 10px; height: 18px; position: relative; overflow: hidden; border: 1px solid #ddd; margin-bottom: 15px;">
             <div style="background: var(--verde-principal); width: ${porc}%; height: 100%; transition: 0.5s;"></div>
             <span style="position: absolute; width: 100%; left:0; top:0; font-size: 0.65rem; line-height: 18px; color: white; font-weight:bold; text-align:center;">${porc}%</span>
-        </div>
+        </div>` : ''}
 
         <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin: 10px 0 15px 0;">
             <label class="switch-container">
@@ -781,12 +822,12 @@ function renderizar() {
     const listaFiltradaJSONString = encodeURIComponent(JSON.stringify(filtrados));
 
     let htmlFinalCards = "";
-    if(!isAdmin && filtrados.length === 0) {
+    if(tipoUsuarioLogado === "Aluna" && filtrados.length === 0) {
         htmlFinalCards = `<div style="text-align:center; color:#a5d6a7; padding: 40px 20px; font-weight:bold; font-size:0.9rem;">Nenhum treino agendado para o dia de hoje (${hojeString}). Descanse!</div>`;
     } else {
         htmlFinalCards = `<div class="grid-moderno">` + filtrados.map((t, index) => {
             let botaoAcaoHtml = "";
-            if (!isAdmin && !t.concluido) {
+            if (tipoUsuarioLogado === "Aluna" && !t.concluido) {
                 if (!t.iniciado) botaoAcaoHtml = `<button onclick="event.stopPropagation(); marcarInicio('${t.idVinculo}')" class="btn-principal btn-iniciar">Iniciar</button>`;
                 else botaoAcaoHtml = `<button onclick="event.stopPropagation(); marcarFeito('${t.idVinculo}')" class="btn-principal btn-concluir">Concluir</button>`;
             }
@@ -800,7 +841,7 @@ function renderizar() {
                     ${t.iniciado ? `<div class="inicio-txt">⏱️ Início: ${t.dataInicio}</div>` : ''}
                     ${botaoAcaoHtml}
                     ${t.concluido ? `<div class="feito-txt">✓ ${t.dataConclusao}</div>` : ''}
-                    ${isAdmin ? `
+                    ${isTreinador ? `
                         <div style="margin-top:5px; border-top:1px solid #444; padding-top:3px; font-size:0.7rem; color:#ffeb3b; font-weight:bold;">Dia: ${t.dataProgramada}</div>
                         <div style="margin-top:5px; border-top:1px solid #444; padding-top:5px; display:flex; justify-content:space-between; align-items:center;">
                             <small style="font-size:0.6rem;">${t.aluna}</small>
@@ -818,13 +859,13 @@ function renderizar() {
     }
 
     if (container) container.innerHTML = `${htmlTopo}${htmlFinalCards}`;
-    if (!isAdmin && usuarioLogado !== "") {
+    if (usuarioLogado !== "" && tipoUsuarioLogado !== "Admin") {
         const checkFixar = document.getElementById('fixar-ferramentas');
         if (window.ferramentaFixaStatus) { if (checkFixar) checkFixar.checked = true; alternarFixacao(true); }
     }
 
     const listaMult = document.getElementById('lista-selecao-multipla');
-    if(listaMult && isAdmin) {
+    if(listaMult && isTreinador) {
         const categoriasLib = [...new Set(biblioteca.map(ex => ex.categoria || ex.category))];
         categoriasLib.sort((a, b) => {
             let indexA = ORDEM_DEFINIDA.indexOf(normalizar(a)); let indexB = ORDEM_DEFINIDA.indexOf(normalizar(b));
@@ -843,11 +884,11 @@ function renderizar() {
         `).join('');
     }
 
-    if(isAdmin) {
-        document.getElementById('lista-avisos').innerHTML = treinosDesignados.filter(t => t.concluido).reverse().map(t => `<div style="font-size:0.75rem; border-bottom:1px solid #eee; padding:10px;">✅ <b>${t.aluna}</b> concluiu ${t.nome} em ${t.dataConclusao}</div>`).join('') || "Sem atividades.";
-        document.getElementById('select-aluna-vinculo').innerHTML = alunas.map(a => `<option value="${a.nome}">${a.nome}</option>`).join('');
+    if(isTreinador) {
+        document.getElementById('lista-avisos').innerHTML = treinosDesignados.filter(t => t.concluido && t.idTreinador === usuarioLogado).reverse().map(t => `<div style="font-size:0.75rem; border-bottom:1px solid #eee; padding:10px;">✅ <b>${t.aluna}</b> concluiu ${t.nome} em ${t.dataConclusao}</div>`).join('') || "Sem atividades.";
+        document.getElementById('select-aluna-vinculo').innerHTML = alunasDoTreinador.map(a => `<option value="${a.nome}">${a.nome}</option>`).join('');
         
-        document.getElementById('container-fichas').innerHTML = alunas.map(a => {
+        document.getElementById('container-fichas').innerHTML = alunasDoTreinador.map(a => {
             let anamneseHtml = `<p style="font-size:0.8rem; color:#e0e0e0; margin-top:5px;"><b>Anamnese:</b> Não respondeu ainda.</p>`;
             if (a.anamnese) {
                 const ana = a.anamnese;
@@ -871,7 +912,9 @@ function renderizar() {
                 </div>
             </div>`;
         }).join('');
-        
+    }
+
+    if(isAdmin) {
         document.getElementById('lista-admin-biblioteca').innerHTML = biblioteca.map(ex => `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
                 <span>${ex.nome} <small style="color:#666; font-size:0.7rem; margin-left:5px;">(${ex.categoria || ex.category})</small></span>
@@ -881,10 +924,19 @@ function renderizar() {
                 </div>
             </div>`).join('');
 
-        document.getElementById('lista-playlists-admin').innerHTML = playlists.map(p => `
+        document.getElementById('lista-admin-treinadores').innerHTML = treinadores.map(t => `
+            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+                <span><i class="fas fa-user-shield" style="color:#43a047; margin-right:8px;"></i>${t.nome}</span>
+                <button onclick="excluirItem('treinadores','${t.id}')">✖</button>
+            </div>`).join('') || "<div style='color: white; padding: 10px;'>Nenhum treinador cadastrado.</div>";
+    }
+
+    const playlistAdminContainer = document.getElementById('lista-playlists-admin');
+    if(playlistAdminContainer && (isTreinador || tipoUsuarioLogado === "Aluna")) {
+        playlistAdminContainer.innerHTML = playlists.map(p => `
             <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
                 <span><i class="fas fa-music" style="color:#43a047; margin-right:8px;"></i>${p.nome}</span>
-                <button onclick="excluirItem('playlists','${p.id}')">✖</button>
+                ${isTreinador ? `<button onclick="excluirItem('playlists','${p.id}')">✖</button>` : ''}
             </div>`).join('') || "<div style='color: white; padding: 10px;'>Nenhuma playlist cadastrada.</div>";
     }
 }
@@ -909,3 +961,4 @@ window.limparFormularioBiblioteca = limparFormularioBiblioteca;
 window.salvarPlaylist = salvarPlaylist;
 window.carregarPlaylistNoPlayer = carregarPlaylistNoPlayer;
 window.switchTab = switchTab;
+window.cadastrarTreinador = cadastrarTreinador;
