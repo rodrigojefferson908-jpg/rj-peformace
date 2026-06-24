@@ -1,6 +1,3 @@
-/* ==========================================
-   1. CORES, VARIÁVEIS E CONFIGURAÇÕES BASE
-   ========================================== */
 :root {
     --verde-escuro: #1b5e20;
     --verde-principal: #2e7d32;
@@ -26,7 +23,6 @@ body {
     overflow-x: hidden;
 }
 
-/* Estilos da Anamnese */
 .passo-anamnese h3 {
     color: #43a047 !important;
     margin-bottom: 12px;
@@ -49,7 +45,6 @@ body {
     cursor: pointer;
 }
 
-/* Scroll-Timer */
 .input-scroll-timer {
     width: 65px !important;
     padding: 8px !important;
@@ -63,9 +58,6 @@ body {
     margin: 0 !important;
 }
 
-/* ==========================================
-   2. INTERFACE E MENU LATERAL RETRÁTIL
-   ========================================== */
 #app {
     width: 100% !important;
     max-width: 100% !important;
@@ -90,7 +82,6 @@ body {
     justify-content: center;
 }
 
-/* Estrutura Menu Lateral */
 .menu-lateral {
     position: fixed;
     top: 0;
@@ -129,7 +120,6 @@ body {
     cursor: pointer;
 }
 
-/* Links do Menu */
 .menu-item {
     padding: 15px 20px;
     color: #ffffff;
@@ -176,9 +166,6 @@ body {
     display: block;
 }
 
-/* ==========================================
-   3. FLUXOS E CARDS DO SISTEMA
-   ========================================== */
 .container-flexbox-vertical {
     display: flex;
     flex-direction: column;
@@ -279,7 +266,6 @@ body {
     }
 }
 
-/* Elementos internos dos cards */
 #container-treinos div[style*="color: var(--verde-escuro)"] {
     color: #43a047 !important;
     border-bottom: 2px solid #444 !important;
@@ -303,9 +289,6 @@ body {
 .inicio-txt { color: #43a047 !important; font-weight: bold; font-size: 0.7rem; margin-top: 5px; margin-bottom: 5px; }
 .feito-txt { color: #ef5350 !important; font-weight: bold; font-size: 0.7rem; margin-top: 2px; }
 
-/* ==========================================
-   4. COMPONENTES DAS FERRAMENTAS DE TEMPO
-   ========================================== */
 .select-ferramenta {
     width: 100%;
     max-width: 100%;
@@ -332,9 +315,6 @@ body {
 
 .btn-pequeno { padding: 8px 15px; font-size: 0.8rem; border-radius: 8px; font-weight: bold; border: none; cursor: pointer; color: white; }
 
-/* ==========================================
-   5. LOGIN E BASE DA TELA
-   ========================================== */
 .flex-center {
     display: flex; justify-content: center; align-items: center; min-height: 100vh; background-color: #2b2b2b !important;
 }
@@ -351,7 +331,6 @@ body {
 
 .login-box label, .login-box p, .login-box h2, .login-box h3 { color: #ffffff !important; margin-bottom: 8px; display: block; font-weight: 500; }
 
-/* Header */
 .header-moderno {
     background: #1a1a1a !important; color: white; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 1000; border-bottom: 1px solid #333; height: 65px;
 }
@@ -368,7 +347,6 @@ input, textarea, select {
 .btn-concluir { background: #d32f2f !important; color: white !important; margin-top: 5px; }
 .btn-cancelar { background: #666 !important; margin-top: -5px; margin-bottom: 15px; }
 
-/* Multipla Seleção */
 .lista-multipla { max-height: 300px; overflow-y: auto; padding: 5px; }
 .item-selecao {
     display: flex; align-items: center; background: #1a1a1a; padding: 10px; border-radius: 12px; margin-bottom: 8px; border: 1px solid #333;
@@ -387,7 +365,6 @@ input, textarea, select {
 
 .card-verde h3, .card-verde span, .card-verde p { color: #43a047 !important; }
 
-/* Componentes de Lista Admin */
 .lista-admin div {
     display: flex; justify-content: space-between; align-items: center; padding: 12px; background: #1a1a1a !important; border: 1px solid #333 !important; color: #ffffff !important; margin-bottom: 8px; border-radius: 12px; cursor: pointer;
 }
@@ -406,9 +383,6 @@ input, textarea, select {
 #container-fichas .card-moderno p { color: #a5d6a7; font-size: 0.9rem; text-align: left; }
 #container-fichas .card-moderno img { opacity: 0.9; border-bottom: 1px solid #444; }
 
-/* ==========================================
-   5. LOGOS, ORDENAÇÃO E MODAL
-   ========================================== */
 .logo-site { width: auto; display: inline-block; vertical-align: middle; }
 .logo-login { max-height: 200px; margin-bottom: -50px; }
 .logo-principal {
@@ -424,7 +398,6 @@ input, textarea, select {
 }
 .btn-ordem:hover { background: #43a047 !important; color: #ffffff !important; }
 
-/* Modal */
 .modal-overlay {
     display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); z-index: 4000; justify-content: center; align-items: center;
 }
@@ -438,7 +411,6 @@ input, textarea, select {
 .modal-content h3 { color: #43a047; margin-bottom: 10px; }
 .modal-content p { color: #ffffff; line-height: 1.4; }
 
-/* HIIT Semáforo */
 .hiit-status-animado {
     font-size: 2.2rem !important; font-weight: 900 !important; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: block; animation: popImpacto 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) both;
 }
