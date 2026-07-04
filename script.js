@@ -87,17 +87,17 @@ window.toggleMenuLateral = () => {
 window.switchTab = (aba) => {
     document.querySelectorAll('.tab-content').forEach(t => t.style.display = 'none');
     document.querySelectorAll('.menu-item').forEach(b => b.classList.remove('active'));
-    
+
     const target = document.getElementById(`aba-${aba}`);
     if(target) target.style.display = 'block';
-    
+
     const btnMenu = document.getElementById(`btn-menu-${aba}`);
     if(btnMenu) btnMenu.classList.add('active');
 
     if(aba === 'lista' && tipoUsuarioLogado === "Treinador") { 
         alunaSelecionadaFluxo = ""; 
     }
-    
+
     const menu = document.getElementById('menu-lateral');
     const overlay = document.getElementById('menu-overlay');
     if(menu && menu.classList.contains('aberto')) {
@@ -214,7 +214,7 @@ function finalizarESalvarAnamnese() {
 window.fazerLogin = () => {
     const user = document.getElementById('input-usuario').value.trim();
     const pass = document.getElementById('input-senha').value;
-    
+
     if(user === "Admin" && pass === "147258") {
         entrarNoApp("Admin", "Admin");
     } else {
@@ -253,11 +253,11 @@ function entrarNoApp(nome, tipo) {
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('app').style.display = 'block';
-    
+
     document.getElementById('avisos-admin').style.display = tipo === "Treinador" ? "block" : "none";
     document.getElementById('boas-vindas').innerText = `Olá, ${nome}`;
     alunaSelecionadaFluxo = "";
-    
+
     atualizarEstruturaMenuLateral();
     if(tipo === "Admin") {
         switchTab('criar-treino');
@@ -274,7 +274,7 @@ window.logout = function() {
     document.getElementById('tela-login').style.display = 'flex';
     document.getElementById('input-usuario').value = "";
     document.getElementById('input-senha').value = "";
-    
+
     const menu = document.getElementById('menu-lateral');
     const overlay = document.getElementById('menu-overlay');
     if(menu && menu.classList.contains('aberto')) {
@@ -329,7 +329,7 @@ window.iniciarTimer = () => {
     window.atualizarValoresTimerScroll();
     let tempoTotal = (memoriaTimerMin * 60) + memoriaTimerSeg;
     if (tempoTotal <= 0) return;
-    
+
     if(document.getElementById('timer-min-input')) document.getElementById('timer-min-input').disabled = true;
     if(document.getElementById('timer-seg-input')) document.getElementById('timer-seg-input').disabled = true;
 
@@ -463,7 +463,7 @@ window.cadastrarTreinador = () => {
     const nome = document.getElementById('cad-nome-treinador').value.trim();
     const senha = document.getElementById('cad-senha-treinador').value.trim();
     if(!nome || !senha) return alert("Preencha o nome e a senha do treinador!");
-    
+
     push(ref(db, 'treinadores/'), { nome, senha }).then(() => {
         alert("Novo treinador cadastrado com sucesso!");
         document.getElementById('cad-nome-treinador').value = "";
@@ -477,7 +477,7 @@ window.cadastrarAluna = () => {
     const foto = document.getElementById('cad-foto-aluna').value.trim() || 'https://via.placeholder.com/150';
     const info = document.getElementById('cad-info-aluna').value.trim();
     if(!nome || !senha) return alert("Preencha nome e senha!");
-    
+
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
             alert("Cadastro da aluna atualizado com sucesso!");
@@ -519,7 +519,7 @@ window.salvarNaBiblioteca = () => {
         });
     } else {
         push(ref(db, 'biblioteca/'), { nome, foto, legenda, categoria: category, category }).then(() => {
-            alert("Exercício salvo na biblioteca geral!");
+            alert("Exercício saved na biblioteca geral!");
             limparFormularioBiblioteca();
         });
     }
@@ -583,7 +583,7 @@ window.prepararEdicaoAluna = (id) => {
     document.getElementById('cad-senha-aluna').value = aluna.senha; 
     document.getElementById('cad-foto-aluna').value = aluna.foto; 
     document.getElementById('cad-info-aluna').value = aluna.info || "";
-    
+
     document.getElementById('titulo-cad-aluna').innerHTML = `<i class="fas fa-edit"></i> Editando Dados de: ${aluna.nome}`;
     document.getElementById('btn-salvar-aluna').innerText = "ATUALIZAR DADOS";
     document.getElementById('btn-cancelar-edit-aluna').style.display = "block";
@@ -599,7 +599,7 @@ window.prepararEdicaoBiblioteca = (id) => {
     document.getElementById('lib-foto').value = ex.foto; 
     document.getElementById('lib-legenda').value = ex.legenda || ""; 
     document.getElementById('lib-categoria').value = ex.categoria || ex.category;
-    
+
     document.getElementById('titulo-lib-exercicio').innerHTML = `<i class="fas fa-edit"></i> Editando Exercício`;
     document.getElementById('btn-salvar-lib').innerText = "ATUALIZAR EXERCÍCIO";
     document.getElementById('btn-cancelar-edit-lib').style.display = "block";
@@ -691,23 +691,70 @@ function renderizar() {
     let alunasDoTreinador = isTreinador ? alunas.filter(a => a.idTreinador === usuarioLogado) : alunas;
 
     if (isTreinador) {
+        const selectVinculo = document.getElementById('select-aluna-vinculo');
+        if (selectVinculo) {
+            selectVinculo.innerHTML = alunasDoTreinador.map(a => `<option value="${a.nome}">${a.nome}</option>`).join('');
+        }
+
+        const containerFichas = document.getElementById('container-fichas');
+        if (containerFichas) {
+            containerFichas.innerHTML = alunasDoTreinador.map(a => {
+                let anamneseHtml = `<p style="font-size:0.8rem; color:#e0e0e0; margin-top:5px;"><b>Anamnese:</b> Não respondeu ainda.</p>`;
+                if (a.anamnese) {
+                    const ana = a.anamnese;
+                    anamneseHtml = `
+                    <div style="margin-top:10px; padding:8px; background:#1a1a1a; border-radius:8px; text-align:left; font-size:0.75rem; color:#a5d6a7; border: 1px solid #333;">
+                        <div style="color:#ffeb3b; font-weight:bold; margin-bottom:4px;">📋 RESUMO DA ANAMNESE (${ana.dataEnvio || ''}):</div>
+                        <b>Idade/Sexo:</b> ${ana.identificacao?.idade || ''} anos - ${ana.identificacao?.sexo || ''}<br><b>Peso/Altura:</b> ${ana.identificacao?.peso || ''}kg / ${ana.identificacao?.altura || ''}m<br><b>Objetivos:</b> ${ana.objetivos?.principais?.join(', ') || ''} ${ana.objetivos?.outro ? `(${ana.objetivos.outro})` : ''}<br><b>Pratica atual?</b> ${ana.historicoAtividade?.praticaAtualmente || ''} ${ana.historicoAtividade?.modalidade ? `(${ana.historicoAtividade.modalidade})` : ''}<br><b>Doenças:</b> ${ana.historicoMedico?.possuiDoenca === 'Sim' ? (ana.historicoMedico?.doencas?.join(', ') || 'Sim') : 'Nenhuma'}<br><b>Lesões:</b> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'} (Dor: ${ana.lesoesLimitacoes?.escalaDor || '0'}/10)<br><b>Dias/Tempo:</b> ${ana.disponibilidade?.diasSemana || ''} / ${ana.disponibilidade?.tempoSessao || ''}<br><b>Treinar em:</b> ${ana.disponibilidade?.localTreino || ''}
+                    </div>`;
+                }
+                return `
+                <div class="card-moderno">
+                    <img src="${a.foto}">
+                    <div class="info">
+                        <h3>${a.nome}</h3>
+                        <p>${a.info || 'Sem notas.'}</p>
+                        ${anamneseHtml}
+                        <div style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
+                            <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')" title="Editar dados da aluna"><i class="fas fa-edit"></i> Editar</button>
+                            <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')" title="Excluir aluna"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        const listaAvisos = document.getElementById('lista-avisos');
+        if (listaAvisos) {
+            listaAvisos.innerHTML = treinosDesignados.filter(t => t.concluido && t.idTreinador === usuarioLogado).reverse().map(t => `<div style="font-size:0.75rem; border-bottom:1px solid #eee; padding:10px;">✅ <b>${t.aluna}</b> concluiu ${t.nome} em ${t.dataConclusao}</div>`).join('') || "Sem atividades.";
+        }
+    }
+
+    if (isTreinador) {
         if(subTelaAlunas) subTelaAlunas.style.display = "none";
         if(subTelaTreinos) subTelaTreinos.style.display = "none";
         if(subTelaExercicios) subTelaExercicios.style.display = "none";
         if (!alunaSelecionadaFluxo) {
             if(subTelaAlunas) subTelaAlunas.style.display = "block";
-            document.getElementById('lista-fluxo-alunas').innerHTML = alunasDoTreinador.map(a => `
-                <div onclick="selecionarAlunaFluxo('${a.nome}')" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
-                    <span><i class="fas fa-user"></i> ${a.nome}</span>
-                    <i class="fas fa-chevron-right" style="color: #43a047;"></i>
-                </div>
-            `).join('') || "<div style='color: white; padding: 10px;'>Nenhuma aluna vinculada a você.</div>";
-            return;
+            const listaFluxo = document.getElementById('lista-fluxo-alunas');
+            if (listaFluxo) {
+                listaFluxo.innerHTML = alunasDoTreinador.map(a => `
+                    <div onclick="selecionarAlunaFluxo('${a.nome}')" style="display:flex; justify-content:space-between; align-items:center; width:100%;">
+                        <span><i class="fas fa-user"></i> ${a.nome}</span>
+                        <i class="fas fa-chevron-right" style="color: #43a047;"></i>
+                    </div>
+                `).join('') || "<div style='color: white; padding: 10px;'>Nenhuma aluna vinculada a você.</div>";
+            }
+            executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
+            return; 
         } else {
             if(subTelaExercicios) subTelaExercicios.style.display = "block";
-            document.getElementById('container-botao-voltar-exercicios').innerHTML = `
-                <button onclick="voltarParaAlunas()" class="btn-principal" style="width: auto; padding: 5px 15px; background: #666; margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Voltar</button>
-            `;
+            const btnVoltar = document.getElementById('container-botao-voltar-exercicios');
+            if (btnVoltar) {
+                btnVoltar.innerHTML = `
+                    <button onclick="voltarParaAlunas()" class="btn-principal" style="width: auto; padding: 5px 15px; background: #666; margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Voltar</button>
+                `;
+            }
             filtrados = treinosDesignados.filter(t => t.aluna === alunaSelecionadaFluxo);
         }
     } else if (tipoUsuarioLogado === "Aluna") {
@@ -722,7 +769,7 @@ function renderizar() {
         const concluidos = filtrados.filter(t => t.concluido).length;
         const porc = filtrados.length > 0 ? Math.round((concluidos / filtrados.length) * 100) : 0;
         let interfaceFerramentaSelecionada = "";
-        
+
         if (ferramentaAtiva === "timer") {
             interfaceFerramentaSelecionada = `
                 <h3 style="font-size: 0.9rem; margin-bottom: 10px;">⏱️ Temporizador</h3>
@@ -859,6 +906,11 @@ function renderizar() {
     }
 
     if (container) container.innerHTML = `${htmlTopo}${htmlFinalCards}`;
+    
+    window.executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
+}
+
+window.executarRenderizacoesFinais = function(isAdmin, isTreinador, biblioteca) {
     if (usuarioLogado !== "" && tipoUsuarioLogado !== "Admin") {
         const checkFixar = document.getElementById('fixar-ferramentas');
         if (window.ferramentaFixaStatus) { if (checkFixar) checkFixar.checked = true; alternarFixacao(true); }
@@ -884,51 +936,27 @@ function renderizar() {
         `).join('');
     }
 
-    if(isTreinador) {
-        document.getElementById('lista-avisos').innerHTML = treinosDesignados.filter(t => t.concluido && t.idTreinador === usuarioLogado).reverse().map(t => `<div style="font-size:0.75rem; border-bottom:1px solid #eee; padding:10px;">✅ <b>${t.aluna}</b> concluiu ${t.nome} em ${t.dataConclusao}</div>`).join('') || "Sem atividades.";
-        document.getElementById('select-aluna-vinculo').innerHTML = alunasDoTreinador.map(a => `<option value="${a.nome}">${a.nome}</option>`).join('');
-        
-        document.getElementById('container-fichas').innerHTML = alunasDoTreinador.map(a => {
-            let anamneseHtml = `<p style="font-size:0.8rem; color:#e0e0e0; margin-top:5px;"><b>Anamnese:</b> Não respondeu ainda.</p>`;
-            if (a.anamnese) {
-                const ana = a.anamnese;
-                anamneseHtml = `
-                <div style="margin-top:10px; padding:8px; background:#1a1a1a; border-radius:8px; text-align:left; font-size:0.75rem; color:#a5d6a7; border: 1px solid #333;">
-                    <div style="color:#ffeb3b; font-weight:bold; margin-bottom:4px;">📋 RESUMO DA ANAMNESE (${ana.dataEnvio || ''}):</div>
-                    <b>Idade/Sexo:</b> ${ana.identificacao?.idade || ''} anos - ${ana.identificacao?.sexo || ''}<br><b>Peso/Altura:</b> ${ana.identificacao?.peso || ''}kg / ${ana.identificacao?.altura || ''}m<br><b>Objetivos:</b> ${ana.objetivos?.principais?.join(', ') || ''} ${ana.objetivos?.outro ? `(${ana.objetivos.outro})` : ''}<br><b>Pratica atual?</b> ${ana.historicoAtividade?.praticaAtualmente || ''} ${ana.historicoAtividade?.modalidade ? `(${ana.historicoAtividade.modalidade})` : ''}<br><b>Doenças:</b> ${ana.historicoMedico?.possuiDoenca === 'Sim' ? (ana.historicoMedico?.doencas?.join(', ') || 'Sim') : 'Nenhuma'}<br><b>Lesões:</b> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'} (Dor: ${ana.lesoesLimitacoes?.escalaDor || '0'}/10)<br><b>Dias/Tempo:</b> ${ana.disponibilidade?.diasSemana || ''} / ${ana.disponibilidade?.tempoSessao || ''}<br><b>Treinar em:</b> ${ana.disponibilidade?.localTreino || ''}
-                </div>`;
-            }
-            return `
-            <div class="card-moderno">
-                <img src="${a.foto}">
-                <div class="info">
-                    <h3>${a.nome}</h3>
-                    <p>${a.info || 'Sem notas.'}</p>
-                    ${anamneseHtml}
-                    <div style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
-                        <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')" title="Editar dados da aluna"><i class="fas fa-edit"></i> Editar</button>
-                        <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')" title="Excluir aluna"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
     if(isAdmin) {
-        document.getElementById('lista-admin-biblioteca').innerHTML = biblioteca.map(ex => `
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
-                <span>${ex.nome} <small style="color:#666; font-size:0.7rem; margin-left:5px;">(${ex.categoria || ex.category})</small></span>
-                <div>
-                    <button class="btn-edit" onclick="prepararEdicaoBiblioteca('${ex.id}')"><i class="fas fa-edit"></i></button>
-                    <button onclick="excluirItem('biblioteca','${ex.id}')">✖</button>
-                </div>
-            </div>`).join('');
+        const adminBib = document.getElementById('lista-admin-biblioteca');
+        if(adminBib) {
+            adminBib.innerHTML = biblioteca.map(ex => `
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+                    <span>${ex.nome} <small style="color:#666; font-size:0.7rem; margin-left:5px;">(${ex.categoria || ex.category})</small></span>
+                    <div>
+                        <button class="btn-edit" onclick="prepararEdicaoBiblioteca('${ex.id}')"><i class="fas fa-edit"></i></button>
+                        <button onclick="excluirItem('biblioteca','${ex.id}')">✖</button>
+                    </div>
+                </div>`).join('');
+        }
 
-        document.getElementById('lista-admin-treinadores').innerHTML = treinadores.map(t => `
-            <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
-                <span><i class="fas fa-user-shield" style="color:#43a047; margin-right:8px;"></i>${t.nome}</span>
-                <button onclick="excluirItem('treinadores','${t.id}')">✖</button>
-            </div>`).join('') || "<div style='color: white; padding: 10px;'>Nenhum treinador cadastrado.</div>";
+        const adminTreinadores = document.getElementById('lista-admin-treinadores');
+        if(adminTreinadores) {
+            adminTreinadores.innerHTML = treinadores.map(t => `
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; margin-bottom:5px;">
+                    <span><i class="fas fa-user-shield" style="color:#43a047; margin-right:8px;"></i>${t.nome}</span>
+                    <button onclick="excluirItem('treinadores','${t.id}')">✖</button>
+                </div>`).join('') || "<div style='color: white; padding: 10px;'>Nenhum treinador cadastrado.</div>";
+        }
     }
 
     const playlistAdminContainer = document.getElementById('lista-playlists-admin');
@@ -939,7 +967,7 @@ function renderizar() {
                 ${isTreinador ? `<button onclick="excluirItem('playlists','${p.id}')">✖</button>` : ''}
             </div>`).join('') || "<div style='color: white; padding: 10px;'>Nenhuma playlist cadastrada.</div>";
     }
-}
+};
 
 window.abrirModal = (id) => {
     const ex = biblioteca.find(e => e.id === id) || treinosDesignados.find(t => t.idVinculo === id) || treinosDesignados.find(t => t.id === id);
