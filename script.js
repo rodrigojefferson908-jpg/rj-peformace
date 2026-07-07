@@ -482,7 +482,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna updated com sucesso!");
+            alert("Cadastro da aluna atualizado com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -651,23 +651,36 @@ onValue(ref(db, '/'), (snapshot) => {
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     renderizar();
 });
-
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
     const selecionados = document.querySelectorAll('.check-exercicio:checked');
-    if(!nomeAluna || selecionados.length === 0 || !dataSelecionada) return alert("Por favor, selecione a aluna, os exercícios e a data do treino!");
-    const [ano, mes, dia] = dataSelecionada.split('-'); const dataFormatada = `${dia}/${mes}/${ano}`;
+    
+    if(!nomeAluna || selecionados.length === 0 || !dataSelecionada) {
+        return alert("Por favor, selecione a aluna, os exercícios e a data do treino!");
+    }
+    
+    const [ano, mes, dia] = dataSelecionada.split('-'); 
+    const dataFormatada = `${dia}/${mes}/${ano}`;
     const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
-    let maiorOrdem = 0; exerciciosExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
+    
+    let maiorOrdem = 0; 
+    exerciciosExistentes.forEach(e => { 
+        if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
+    });
 
     selecionados.forEach((cb, index) => {
-        const id = cb.dataset.id; const ex = biblioteca.find(e => e.id === id);
+        const id = cb.dataset.id; 
+        const ex = biblioteca.find(e => e.id === id);
         
-        // CORREÇÃO AQUI: Captura individualmente o valor digitado nos inputs específicos deste exercício (id)
-        const inputSeriesVal = document.getElementById(`series-${id}`).value || "3";
-        const inputRepsVal = document.getElementById(`reps-${id}`).value || "12";
-        const stringDetalhes = `${inputSeriesVal}x${inputRepsVal}`;
+        // Pega exatamente o que foi digitado na linha deste exercício específico
+        const inputSeriesVal = document.getElementById(`series-${id}`).value.trim();
+        const inputRepsVal = document.getElementById(`reps-${id}`).value.trim();
+        
+        // Se estiver em branco, define o padrão (3x12), mas se tiver valor, usa o digitado independente do número de exercícios
+        const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
+        const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
+        const stringDetalhes = `${seriesFinal}x${repsFinal}`;
 
         push(ref(db, 'treinosDesignados/'), {
             ...ex, 
@@ -680,6 +693,7 @@ window.vincularTreinosSelecionados = () => {
             idTreinador: usuarioLogado
         });
     });
+    
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
 
@@ -995,6 +1009,7 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
+// Registro seguro de handlers no DOM após carregamento total do módulo
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
