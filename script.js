@@ -1,5 +1,5 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getDatabase, ref, set, push, onValue, remove, update, get } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
+import { getDatabase, ref, set, push, onValue, remove, update } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js";
 
 const firebaseConfig = {
     apiKey: "AIzaSyALgq-QhWX3Z27xaQcbAhGA0uaVso2Mmkw",
@@ -72,7 +72,7 @@ const ORDEM_DEFINIDA = [
 ];
 
 function normalizar(texto) {
-    return texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
+    return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
 
 window.toggleMenuLateral = () => {
@@ -142,8 +142,10 @@ function atualizarEstruturaMenuLateral() {
 window.toggleSenhaVisualizacao = () => {
     const input = document.getElementById('input-senha');
     const icone = document.getElementById('toggleSenha');
-    input.type = input.type === "password" ? "text" : "password";
-    icone.classList.toggle("fa-eye-slash");
+    if (input && icone) {
+        input.type = input.type === "password" ? "text" : "password";
+        icone.classList.toggle("fa-eye-slash");
+    }
 };
 
 window.toggleCamposAnamnese = (idContainer, show) => {
@@ -373,7 +375,7 @@ window.iniciarCronometro = () => {
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
-window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
+window.pausarCronometro = () => { clearInterval(cronometroInterval); cronSelfInterval = null; cronometroInterval = null; };
 window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
@@ -519,7 +521,7 @@ window.salvarNaBiblioteca = () => {
         });
     } else {
         push(ref(db, 'biblioteca/'), { nome, foto, legenda, categoria: category, category }).then(() => {
-            alert("Exercício saved na biblioteca geral!");
+            alert("Exercício salvo na biblioteca geral!");
             limparFormularioBiblioteca();
         });
     }
@@ -710,7 +712,7 @@ function renderizar() {
                 }
                 return `
                 <div class="card-moderno">
-                    <img src="${a.foto}">
+                    <img src="${a.foto}" alt="Foto Aluna">
                     <div class="info">
                         <h3>${a.nome}</h3>
                         <p>${a.info || 'Sem notas.'}</p>
@@ -745,7 +747,7 @@ function renderizar() {
                     </div>
                 `).join('') || "<div style='color: white; padding: 10px;'>Nenhuma aluna vinculada a você.</div>";
             }
-            executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
+            window.executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
             return; 
         } else {
             if(subTelaExercicios) subTelaExercicios.style.display = "block";
@@ -880,7 +882,7 @@ function renderizar() {
             }
             return `
             <div class="card-moderno ${t.concluido ? 'concluido' : ''}" onclick="abrirModal('${t.idVinculo || t.id}')" style="cursor:pointer;">
-                <img src="${t.foto}">
+                <img src="${t.foto}" alt="Exercício">
                 <div class="info">
                     <span style="font-size: 0.65rem; color: #fff; background: var(--verde-principal); padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${t.categoria || t.category}</span>
                     <h4 style="margin-top: 5px;">${t.nome}</h4>
@@ -901,12 +903,12 @@ function renderizar() {
                         </div>
                     ` : ''}
                 </div>
-            </div>`
+            </div>`;
         }).join('') + `</div>`;
     }
 
     if (container) container.innerHTML = `${htmlTopo}${htmlFinalCards}`;
-    
+
     window.executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
 }
 
@@ -981,6 +983,14 @@ window.abrirModal = (id) => {
     }
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
+
+// Registro seguro de handlers no DOM após carregamento total do módulo
+document.addEventListener('DOMContentLoaded', () => {
+    const btnToggleSenha = document.getElementById('toggleSenha');
+    if(btnToggleSenha) {
+        btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
+    }
+});
 
 window.toggleMenuLateral = toggleMenuLateral;
 window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
