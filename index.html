@@ -12,16 +12,16 @@
         <div class="login-box card-verde">   
             <img src="https://blogger.googleusercontent.com/img/b/R29vZ2xl/AVvXsEijwc7AbCzxGI9_KIBSzHTxjwwMRUq_XTRAgcQy3ZSySyR3s963VTFwy-Peto86yIQwvMYxh0AvEpgkyOOm6GVBNbLVWfarRsxO5VSlA9LgTqo9cBQtsGq1p5ZkaA2q6KhMME0_5qkU_N2Ro8OKlDyRgPRrFelDbNX-_YQ5kgWcBDScSupsA9CswgnCb0w/s1024/1770938687957.png" alt="RJ Performance" class="logo-site logo-login">
             <p>Seu Treino, Seu Resultado</p>
-            
+
             <div class="input-group">
                 <input type="text" id="input-usuario" placeholder="Nome de usuário">
             </div>
-            
+
             <div class="input-group">
                 <input type="password" id="input-senha" placeholder="Sua senha">
-                <i class="fas fa-eye" id="toggleSenha" onclick="toggleSenhaVisualizacao()"></i>
+                <i class="fas fa-eye" id="toggleSenha"></i>
             </div>
-            
+
             <button onclick="fazerLogin()" class="btn-principal">Entrar</button>
         </div>
     </div>
@@ -30,7 +30,7 @@
         <div class="login-box card-verde" style="max-width: 500px; text-align: left;">
             <h2 style="text-align: center; color: #43a047 !important;">Anamnese Inicial</h2>
             <p id="progresso-anamnese" style="text-align: center; color: #a5d6a7 !important; font-size: 0.85rem; margin-bottom: 15px;">Passo 1 de 10</p>
-            
+
             <form id="form-anamnese" onsubmit="event.preventDefault();">
                 <div class="passo-anamnese" id="passo-1">
                     <h3>1. Identificação</h3>
@@ -52,7 +52,7 @@
 
                 <div class="passo-anamnese" id="passo-2" style="display:none;">
                     <h3>2. Objetivos</h3>
-                    <label style="color:white; display:block; margin-bottom:8px;">Qual é seu principal objective?</label>
+                    <label style="color:white; display:block; margin-bottom:8px;">Qual é seu principal objetivo?</label>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Emagrecimento"> Emagrecimento</div>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Hipertrofia"> Ganho de massa muscular (Hipertrofia)</div>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Condicionamento"> Condicionamento físico</div>
@@ -117,7 +117,7 @@
 
                 <div class="passo-anamnese" id="passo-5" style="display:none;">
                     <h3>5. Saúde Cardiovascular (PAR-Q)</h3>
-                    <label style="color:white;">Seu médico já informou que você possui algum problem cardíaco?</label>
+                    <label style="color:white;">Seu médico já informou que você possui algum problema cardíaco?</label>
                     <select id="parq-1"><option value="Não">Não</option><option value="Sim">Sim</option></select>
                     <label style="color:white;">Sente dor ou desconforto no peito durante exercícios?</label>
                     <select id="parq-2"><option value="Não">Não</option><option value="Sim">Sim</option></select>
@@ -173,7 +173,7 @@
                         <option value="Não">Não</option><option value="Sim">Sim</option>
                     </select>
                     <div id="campos-med-sim" style="display:none;"><input type="text" id="ana-med-quais" placeholder="Quais?"></div>
-                    
+
                     <label style="color:white; margin-top:10px; display:block;">Utiliza suplementos?</label>
                     <select id="ana-suple" onchange="toggleCamposAnamnese('campos-suple-sim', this.value === 'Sim')">
                         <option value="Não">Não</option><option value="Sim">Sim</option>
@@ -242,10 +242,10 @@
                 <h3>Menu de Opções</h3>
                 <span class="fechar-menu" onclick="toggleMenuLateral()">&times;</span>
             </div>
-            
+
             <div id="links-menu-dinamico"></div>
         </nav>
-        
+
         <div id="menu-overlay" class="menu-overlay" onclick="toggleMenuLateral()"></div>
 
         <main class="container">
@@ -368,7 +368,7 @@
                     <input type="text" id="musica-nome-playlist" placeholder="Nome da Playlist (Ex: Treino HIIT Insano)">
                     <input type="text" id="musica-link-playlist" placeholder="Link da Playlist do YouTube ou YT Music">
                     <button onclick="salvarPlaylist()" class="btn-principal">Cadastrar Playlist</button>
-                    
+
                     <h3 style="margin-top: 25px; margin-bottom: 10px; font-size:1.1rem;"><i class="fas fa-list"></i> Playlists Cadastradas</h3>
                     <div id="lista-playlists-admin" class="lista-admin"></div>
                 </div>
@@ -376,11 +376,11 @@
 
         </main>
     </div>
-  
+
     <div id="modal-exercicio" class="modal-overlay" onclick="fecharModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <span class="modal-close" onclick="fecharModal()">&times;</span>
-            <img id="modal-img" src="">
+            <img id="modal-img" src="" alt="Exercício">
             <h3 id="modal-titulo"></h3>
             <p id="modal-legenda"></p>
             <div id="modal-horarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85rem; text-align: left;"></div>
