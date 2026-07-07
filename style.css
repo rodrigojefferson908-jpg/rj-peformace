@@ -258,6 +258,11 @@ body {
 .card-moderno:active { transform: scale(0.99); }
 .card-moderno img { width: 100%; height: 120px; object-fit: cover; }
 
+.card-moderno.concluido {
+    opacity: 0.6;
+    border-color: var(--verde-principal) !important;
+}
+
 @media (max-width: 480px) {
     .grid-moderno { display: flex !important; }
     .card-moderno {
