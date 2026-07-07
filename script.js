@@ -482,7 +482,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna atualizado com sucesso!");
+            alert("Cadastro da aluna updated com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -663,9 +663,20 @@ window.vincularTreinosSelecionados = () => {
 
     selecionados.forEach((cb, index) => {
         const id = cb.dataset.id; const ex = biblioteca.find(e => e.id === id);
+        
+        // CORREÇÃO AQUI: Captura individualmente o valor digitado nos inputs específicos deste exercício (id)
+        const inputSeriesVal = document.getElementById(`series-${id}`).value || "3";
+        const inputRepsVal = document.getElementById(`reps-${id}`).value || "12";
+        const stringDetalhes = `${inputSeriesVal}x${inputRepsVal}`;
+
         push(ref(db, 'treinosDesignados/'), {
-            ...ex, aluna: nomeAluna, iniciado: false, concluido: false, dataProgramada: dataFormatada, ordem: maiorOrdem + index + 1,
-            detalhes: `${document.getElementById(`series-${id}`).value || 3}x${document.getElementById(`reps-${id}`).value || 12}`,
+            ...ex, 
+            aluna: nomeAluna, 
+            iniciado: false, 
+            concluido: false, 
+            dataProgramada: dataFormatada, 
+            ordem: maiorOrdem + index + 1,
+            detalhes: stringDetalhes,
             idTreinador: usuarioLogado
         });
     });
@@ -984,7 +995,6 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
-// Registro seguro de handlers no DOM após carregamento total do módulo
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
