@@ -375,8 +375,8 @@ window.iniciarCronometro = () => {
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
-window.pausarCronometro = () => { clearInterval(cronSelfInterval); cronSelfInterval = null; cronSelfInterval = null; };
-window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
+window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
+window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronSelfInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
     if(hiitInterval) return;
@@ -652,7 +652,23 @@ onValue(ref(db, '/'), (snapshot) => {
     renderizar();
 });
 
-// FUNÇÃO ATUALIZADA E CORRIGIDA: Coleta as séries e repetições de cada elemento de forma isolada
+// APLICAR PADRÃO EM LOTE DINAMICAMENTE
+window.aplicarPadraoLote = () => {
+    const seriesGeral = document.getElementById('series-lote').value.trim();
+    const repsGeral = document.getElementById('reps-lote').value.trim();
+    const selecionados = document.querySelectorAll('.check-exercicio:checked');
+    
+    selecionados.forEach(cb => {
+        const id = cb.dataset.id;
+        const inputSeries = document.getElementById(`series-${id}`);
+        const inputReps = document.getElementById(`reps-${id}`);
+        
+        if (inputSeries && seriesGeral !== "") inputSeries.value = seriesGeral;
+        if (inputReps && repsGeral !== "") inputReps.value = repsGeral;
+    });
+};
+
+// VINCULAR TREINOS COM ESCOPO DE LOTE CORRIGIDO
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
@@ -675,14 +691,12 @@ window.vincularTreinosSelecionados = () => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
 
-        // CORREÇÃO AQUI: Usando seletores de ID escapados de forma nativa para evitar falhas com caracteres especiais do Firebase
         const inputSeries = document.getElementById(`series-${id}`);
         const inputReps = document.getElementById(`reps-${id}`);
 
         const inputSeriesVal = inputSeries ? inputSeries.value.trim() : "";
         const inputRepsVal = inputReps ? inputReps.value.trim() : "";
 
-        // Fallback robusto caso estejam vazios
         const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
         const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
         const stringDetalhes = `${seriesFinal}x${repsFinal}`;
@@ -698,6 +712,10 @@ window.vincularTreinosSelecionados = () => {
             idTreinador: usuarioLogado
         });
     });
+
+    // Resetando campos de lote após o vínculo realizado
+    document.getElementById('series-lote').value = "";
+    document.getElementById('reps-lote').value = "";
 
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
@@ -950,17 +968,17 @@ window.executarRenderizacoesFinais = function(isAdmin, isTreinador, biblioteca) 
 
     const listaMult = document.getElementById('lista-selecao-multipla');
     if(listaMult && isTreinador) {
-        const categoriasLib = [...new Set(biblioteca.map(ex => ex.categoria || ex.category))];
-        categoriasLib.sort((a, b) => {
+        const categoriesLib = [...new Set(biblioteca.map(ex => ex.categoria || ex.category))];
+        categoriesLib.sort((a, b) => {
             let indexA = ORDEM_DEFINIDA.indexOf(normalizar(a)); let indexB = ORDEM_DEFINIDA.indexOf(normalizar(b));
             if (indexA === -1) indexA = 999; if (indexB === -1) indexB = 999;
             return indexA - indexB;
         });
-        listaMult.innerHTML = categoriasLib.map(cat => `
+        listaMult.innerHTML = categoriesLib.map(cat => `
             <div style="grid-column: 1/-1; background: var(--verde-principal); color:white; padding:5px 10px; border-radius:8px; margin:10px 0; font-size:0.75rem; font-weight:bold; text-transform:uppercase;">${cat}</div>
             ${biblioteca.filter(ex => (ex.categoria || ex.category) === cat).map(ex => `
                 <div class="item-selecao">
-                    <input type="checkbox" class="check-exercicio" data-id="${ex.id}">
+                    <input type="checkbox" class="check-exercicio" data-id="${ex.id}" onchange="window.aplicarPadraoLote()">
                     <span style="flex:1;">${ex.nome}</span>
                     <div class="inputs-detalhes">
                         <input type="text" id="series-${ex.id}" placeholder="S" style="width:35px;">
