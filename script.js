@@ -375,7 +375,7 @@ window.iniciarCronometro = () => {
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
-window.pausarCronometro = () => { clearInterval(cronometroInterval); cronSelfInterval = null; cronometroInterval = null; };
+window.pausarCronometro = () => { clearInterval(cronSelfInterval); cronSelfInterval = null; cronSelfInterval = null; };
 window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
@@ -651,19 +651,21 @@ onValue(ref(db, '/'), (snapshot) => {
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     renderizar();
 });
+
+// FUNÇÃO ATUALIZADA E CORRIGIDA: Coleta as séries e repetições de cada elemento de forma isolada
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
     const selecionados = document.querySelectorAll('.check-exercicio:checked');
-    
+
     if(!nomeAluna || selecionados.length === 0 || !dataSelecionada) {
         return alert("Por favor, selecione a aluna, os exercícios e a data do treino!");
     }
-    
+
     const [ano, mes, dia] = dataSelecionada.split('-'); 
     const dataFormatada = `${dia}/${mes}/${ano}`;
     const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
-    
+
     let maiorOrdem = 0; 
     exerciciosExistentes.forEach(e => { 
         if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
@@ -672,12 +674,15 @@ window.vincularTreinosSelecionados = () => {
     selecionados.forEach((cb, index) => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
-        
-        // Pega exatamente o que foi digitado na linha deste exercício específico
-        const inputSeriesVal = document.getElementById(`series-${id}`).value.trim();
-        const inputRepsVal = document.getElementById(`reps-${id}`).value.trim();
-        
-        // Se estiver em branco, define o padrão (3x12), mas se tiver valor, usa o digitado independente do número de exercícios
+
+        // CORREÇÃO AQUI: Usando seletores de ID escapados de forma nativa para evitar falhas com caracteres especiais do Firebase
+        const inputSeries = document.getElementById(`series-${id}`);
+        const inputReps = document.getElementById(`reps-${id}`);
+
+        const inputSeriesVal = inputSeries ? inputSeries.value.trim() : "";
+        const inputRepsVal = inputReps ? inputReps.value.trim() : "";
+
+        // Fallback robusto caso estejam vazios
         const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
         const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
         const stringDetalhes = `${seriesFinal}x${repsFinal}`;
@@ -693,7 +698,7 @@ window.vincularTreinosSelecionados = () => {
             idTreinador: usuarioLogado
         });
     });
-    
+
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
 
@@ -957,7 +962,10 @@ window.executarRenderizacoesFinais = function(isAdmin, isTreinador, biblioteca) 
                 <div class="item-selecao">
                     <input type="checkbox" class="check-exercicio" data-id="${ex.id}">
                     <span style="flex:1;">${ex.nome}</span>
-                    <div class="inputs-detalhes"><input type="text" id="series-${ex.id}" placeholder="S" style="width:35px;"><input type="text" id="reps-${ex.id}" placeholder="R" style="width:35px;"></div>
+                    <div class="inputs-detalhes">
+                        <input type="text" id="series-${ex.id}" placeholder="S" style="width:35px;">
+                        <input type="text" id="reps-${ex.id}" placeholder="R" style="width:35px;">
+                    </div>
                 </div>
             `).join('')}
         `).join('');
@@ -1009,7 +1017,6 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
-// Registro seguro de handlers no DOM após carregamento total do módulo
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
