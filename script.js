@@ -376,7 +376,7 @@ window.iniciarCronometro = () => {
     }, 1000);
 };
 window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
-window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronSelfInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
+window.resetarCronometro = () => { clearInterval(cronometroInterval); cronrunning = null; cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
     if(hiitInterval) return;
@@ -652,23 +652,7 @@ onValue(ref(db, '/'), (snapshot) => {
     renderizar();
 });
 
-// APLICAR PADRÃO EM LOTE DINAMICAMENTE
-window.aplicarPadraoLote = () => {
-    const seriesGeral = document.getElementById('series-lote').value.trim();
-    const repsGeral = document.getElementById('reps-lote').value.trim();
-    const selecionados = document.querySelectorAll('.check-exercicio:checked');
-    
-    selecionados.forEach(cb => {
-        const id = cb.dataset.id;
-        const inputSeries = document.getElementById(`series-${id}`);
-        const inputReps = document.getElementById(`reps-${id}`);
-        
-        if (inputSeries && seriesGeral !== "") inputSeries.value = seriesGeral;
-        if (inputReps && repsGeral !== "") inputReps.value = repsGeral;
-    });
-};
-
-// VINCULAR TREINOS COM ESCOPO DE LOTE CORRIGIDO
+// LÓGICA DE VÍNCULO CORRIGIDA INDEPENDENTE POR ITEM
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
@@ -691,12 +675,14 @@ window.vincularTreinosSelecionados = () => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
 
+        // Captura os inputs específicos deste exercício de forma independente
         const inputSeries = document.getElementById(`series-${id}`);
         const inputReps = document.getElementById(`reps-${id}`);
 
         const inputSeriesVal = inputSeries ? inputSeries.value.trim() : "";
         const inputRepsVal = inputReps ? inputReps.value.trim() : "";
 
+        // Se estiver em branco, assume o padrão puro (3 e 12) individualmente
         const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
         const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
         const stringDetalhes = `${seriesFinal}x${repsFinal}`;
@@ -712,10 +698,6 @@ window.vincularTreinosSelecionados = () => {
             idTreinador: usuarioLogado
         });
     });
-
-    // Resetando campos de lote após o vínculo realizado
-    document.getElementById('series-lote').value = "";
-    document.getElementById('reps-lote').value = "";
 
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
@@ -978,7 +960,7 @@ window.executarRenderizacoesFinais = function(isAdmin, isTreinador, biblioteca) 
             <div style="grid-column: 1/-1; background: var(--verde-principal); color:white; padding:5px 10px; border-radius:8px; margin:10px 0; font-size:0.75rem; font-weight:bold; text-transform:uppercase;">${cat}</div>
             ${biblioteca.filter(ex => (ex.categoria || ex.category) === cat).map(ex => `
                 <div class="item-selecao">
-                    <input type="checkbox" class="check-exercicio" data-id="${ex.id}" onchange="window.aplicarPadraoLote()">
+                    <input type="checkbox" class="check-exercicio" data-id="${ex.id}">
                     <span style="flex:1;">${ex.nome}</span>
                     <div class="inputs-detalhes">
                         <input type="text" id="series-${ex.id}" placeholder="S" style="width:35px;">
