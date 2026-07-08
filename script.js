@@ -671,11 +671,13 @@ window.vincularTreinosSelecionados = () => {
         if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
     });
 
+    // PASSO 1: Lemos todas as caixinhas primeiro e guardamos numa lista
+    const treinosParaSalvar = [];
+
     selecionados.forEach((cb, index) => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
 
-        // Captura os inputs específicos deste exercício de forma independente
         const inputSeries = document.getElementById(`series-${id}`);
         const inputReps = document.getElementById(`reps-${id}`);
 
@@ -687,7 +689,7 @@ window.vincularTreinosSelecionados = () => {
         const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
         const stringDetalhes = `${seriesFinal}x${repsFinal}`;
 
-        push(ref(db, 'treinosDesignados/'), {
+        treinosParaSalvar.push({
             ...ex, 
             aluna: nomeAluna, 
             iniciado: false, 
@@ -697,6 +699,11 @@ window.vincularTreinosSelecionados = () => {
             detalhes: stringDetalhes,
             idTreinador: usuarioLogado
         });
+    });
+
+    // PASSO 2: Com tudo lido e guardado, disparamos pro banco de dados
+    treinosParaSalvar.forEach(treino => {
+        push(ref(db, 'treinosDesignados/'), treino);
     });
 
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
