@@ -61,7 +61,7 @@
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Performance"> Performance esportiva</div>
                     <div class="check-group"><input type="checkbox" name="ana-obj" value="Dores"> Redução de dores</div>
                     <input type="text" id="ana-obj-outro" placeholder="Outro objetivo...">
-                    <input type="text" id="ana-prazo" placeholder="Prazo esperado para atingir esse objetivo">
+                    <input type="text" id="ana-prazo" placeholder="Prazo esperado para atingir esse objective">
                 </div>
 
                 <div class="passo-anamnese" id="passo-3" style="display:none;">
@@ -289,6 +289,15 @@
                     </select>
                     <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Data Programada para o Treino:</label>
                     <input type="date" id="data-treino-vinculo" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
+                    
+                    <div class="config-lote" style="background: #1a1a1a; padding: 12px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #333;">
+                        <p style="color: #a5d6a7; font-size: 0.85rem; margin-top: 0; margin-bottom: 8px; font-weight: bold;">Padronizar em lote (Opcional):</p>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="text" id="series-lote" placeholder="Séries Geral (Ex: 4)" oninput="aplicarPadraoLote()" style="flex: 1; margin: 0; padding: 8px; background: #222; color: white; border: 1px solid #444; border-radius: 6px;">
+                            <input type="text" id="reps-lote" placeholder="Reps Geral (Ex: 12)" oninput="aplicarPadraoLote()" style="flex: 1; margin: 0; padding: 8px; background: #222; color: white; border: 1px solid #444; border-radius: 6px;">
+                        </div>
+                    </div>
+
                     <div id="lista-selecao-multipla" class="lista-multipla"></div>
                     <button onclick="vincularTreinosSelecionados()" class="btn-principal">Enviar para Rotina</button>
                 </div>
