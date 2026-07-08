@@ -652,7 +652,7 @@ onValue(ref(db, '/'), (snapshot) => {
     renderizar();
 });
 
-// LÓGICA DE VÍNCULO CORRIGIDA INDEPENDENTE POR ITEM
+// LÓGICA DE VÍNCULO CORRIGIDA COM BUSCA RELATIVA
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
@@ -671,20 +671,20 @@ window.vincularTreinosSelecionados = () => {
         if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
     });
 
-    // PASSO 1: Lemos todas as caixinhas primeiro e guardamos numa lista
     const treinosParaSalvar = [];
 
     selecionados.forEach((cb, index) => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
 
-        const inputSeries = document.getElementById(`series-${id}`);
-        const inputReps = document.getElementById(`reps-${id}`);
+        // A MÁGICA ACONTECE AQUI: Isola a busca apenas na linha deste checkbox
+        const containerItem = cb.closest('.item-selecao');
+        const inputSeries = containerItem.querySelector(`#series-${id}`);
+        const inputReps = containerItem.querySelector(`#reps-${id}`);
 
         const inputSeriesVal = inputSeries ? inputSeries.value.trim() : "";
         const inputRepsVal = inputReps ? inputReps.value.trim() : "";
 
-        // Se estiver em branco, assume o padrão puro (3 e 12) individualmente
         const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
         const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
         const stringDetalhes = `${seriesFinal}x${repsFinal}`;
@@ -701,7 +701,6 @@ window.vincularTreinosSelecionados = () => {
         });
     });
 
-    // PASSO 2: Com tudo lido e guardado, disparamos pro banco de dados
     treinosParaSalvar.forEach(treino => {
         push(ref(db, 'treinosDesignados/'), treino);
     });
