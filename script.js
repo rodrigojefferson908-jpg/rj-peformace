@@ -252,6 +252,13 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
+    
+    // LOGICA DE AUTO-LOGIN NO APP
+    if (navigator.userAgent.includes('wv')) {
+        localStorage.setItem('usuarioLogado', nome);
+        localStorage.setItem('tipoUsuarioLogado', tipo);
+    }
+
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -269,6 +276,12 @@ function entrarNoApp(nome, tipo) {
 }
 
 window.logout = function() {
+    // APAGA OS DADOS DO AUTO-LOGIN
+    if (navigator.userAgent.includes('wv')) {
+        localStorage.removeItem('usuarioLogado');
+        localStorage.removeItem('tipoUsuarioLogado');
+    }
+
     usuarioLogado = "";
     tipoUsuarioLogado = "";
     document.getElementById('app').style.display = 'none';
@@ -1027,6 +1040,15 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
         btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
+    }
+
+    // VERIFICA SESSÃO SALVA AO ABRIR O APP (WEBVIEW)
+    if (navigator.userAgent.includes('wv')) {
+        const userSalvo = localStorage.getItem('usuarioLogado');
+        const tipoSalvo = localStorage.getItem('tipoUsuarioLogado');
+        if (userSalvo && tipoSalvo) {
+            entrarNoApp(userSalvo, tipoSalvo);
+        }
     }
 });
 
