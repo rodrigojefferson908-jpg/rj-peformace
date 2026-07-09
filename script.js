@@ -252,9 +252,19 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
-   // ADICIONE ESTAS DUAS LINHAS:
-    localStorage.setItem("usuarioLogado", nome);
-    localStorage.setItem("tipoUsuarioLogado", tipo);
+    
+    // Tratamento de bloqueio no WebView do MIT App Inventor
+    try {
+        localStorage.setItem("usuarioLogado", nome);
+        localStorage.setItem("tipoUsuarioLogado", tipo);
+        
+        // Envia para o WebView nativo (TinyDB) se o App Inventor solicitar
+        if (window.AppInventor) {
+            window.AppInventor.setWebViewString(nome + "|||" + tipo);
+        }
+    } catch (e) {
+        console.log("Armazenamento bloqueado pelo WebView do App Inventor.");
+    }
 
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
@@ -275,8 +285,16 @@ function entrarNoApp(nome, tipo) {
 window.logout = function() {
     usuarioLogado = "";
     tipoUsuarioLogado = "";
-localStorage.removeItem("usuarioLogado");
-    localStorage.removeItem("tipoUsuarioLogado");
+    
+    // Tratamento de erro no logout
+    try {
+        localStorage.removeItem("usuarioLogado");
+        localStorage.removeItem("tipoUsuarioLogado");
+        if (window.AppInventor) {
+            window.AppInventor.setWebViewString(""); 
+        }
+    } catch (e) {}
+    
     document.getElementById('app').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
@@ -648,7 +666,7 @@ window.moverExercicio = (idVinculo, direcao, listaFiltradaJSON) => {
     update(ref(db), atualizacoes);
 };
 
-let primeiraVez = true; // Flag para checar o login automático apenas ao abrir o site
+let primeiraVez = true;
 
 onValue(ref(db, '/'), (snapshot) => {
     const data = snapshot.val();
@@ -657,23 +675,42 @@ onValue(ref(db, '/'), (snapshot) => {
     treinosDesignados = data?.treinosDesignados ? Object.entries(data.treinosDesignados).map(([id, v]) => ({...v, idVinculo: id})) : [];
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
-    
-    // NOVA VERIFICAÇÃO DE LOGIN:
+
+    // VERIFICAÇÃO DE LOGIN COM PROTEÇÃO PARA WEBVIEW
     if (primeiraVez) {
         primeiraVez = false;
-        const usuarioSalvo = localStorage.getItem("usuarioLogado");
-        const tipoSalvo = localStorage.getItem("tipoUsuarioLogado");
-        
+        let usuarioSalvo = null;
+        let tipoSalvo = null;
+
+        // 1. Tenta recuperar informações do App Inventor via WebViewString
+        try {
+            if (window.AppInventor) {
+                const dadosApp = window.AppInventor.getWebViewString();
+                if (dadosApp && dadosApp.includes("|||")) {
+                    const partes = dadosApp.split("|||");
+                    usuarioSalvo = partes[0];
+                    tipoSalvo = partes[1];
+                }
+            }
+        } catch(e) {}
+
+        // 2. Se não veio do App Inventor, tenta do localStorage do navegador
+        if (!usuarioSalvo || !tipoSalvo) {
+            try {
+                usuarioSalvo = localStorage.getItem("usuarioLogado");
+                tipoSalvo = localStorage.getItem("tipoUsuarioLogado");
+            } catch (e) {}
+        }
+
         if (usuarioSalvo && tipoSalvo) {
             entrarNoApp(usuarioSalvo, tipoSalvo);
             return; 
         }
     }
-    
+
     renderizar();
 });
 
-// LÓGICA DE VÍNCULO CORRIGIDA COM BUSCA RELATIVA
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
     const dataSelecionada = document.getElementById('data-treino-vinculo').value;
@@ -698,7 +735,6 @@ window.vincularTreinosSelecionados = () => {
         const id = cb.dataset.id; 
         const ex = biblioteca.find(e => e.id === id);
 
-        // A MÁGICA ACONTECE AQUI: Isola a busca apenas na linha deste checkbox
         const containerItem = cb.closest('.item-selecao');
         const inputSeries = containerItem.querySelector(`#series-${id}`);
         const inputReps = containerItem.querySelector(`#reps-${id}`);
