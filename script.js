@@ -71,12 +71,6 @@ const ORDEM_DEFINIDA = [
     "MEMBROS SUPERIORES", "SUPERIORES", "CORE", "ABDOMINAL", "ALONGAMENTO"
 ];
 
-function estaNoApp() {
-    return navigator.userAgent.includes("wv") ||
-           navigator.userAgent.includes("MIT") ||
-           navigator.userAgent.includes("Android");
-}
-
 function normalizar(texto) {
     return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
@@ -265,13 +259,7 @@ function entrarNoApp(nome, tipo) {
     document.getElementById('avisos-admin').style.display = tipo === "Treinador" ? "block" : "none";
     document.getElementById('boas-vindas').innerText = `Olá, ${nome}`;
     alunaSelecionadaFluxo = "";
-// Salva a sessão somente no aplicativo
-if (estaNoApp()) {
-    localStorage.setItem("sessaoRJ", JSON.stringify({
-        usuario: nome,
-        tipo: tipo
-    }));
-}
+
     atualizarEstruturaMenuLateral();
     if(tipo === "Admin") {
         switchTab('criar-treino');
@@ -281,7 +269,6 @@ if (estaNoApp()) {
 }
 
 window.logout = function() {
-localStorage.removeItem("sessaoRJ");
     usuarioLogado = "";
     tipoUsuarioLogado = "";
     document.getElementById('app').style.display = 'none';
@@ -1037,21 +1024,7 @@ window.abrirModal = (id) => {
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
 document.addEventListener('DOMContentLoaded', () => {
-    const btnToggleSenha =
-// Recupera a sessão automaticamente
-document.addEventListener("DOMContentLoaded", () => {
-
-    if (!estaNoApp()) return;
-
-    const sessao = JSON.parse(localStorage.getItem("sessaoRJ"));
-
-    if (!sessao) return;
-
-    usuarioLogado = sessao.usuario;
-    tipoUsuarioLogado = sessao.tipo;
-
-    entrarNoApp(usuarioLogado, tipoUsuarioLogado);
- document.getElementById('toggleSenha');
+    const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
         btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
     }
