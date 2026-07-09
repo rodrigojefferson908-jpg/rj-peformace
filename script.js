@@ -265,7 +265,13 @@ function entrarNoApp(nome, tipo) {
     document.getElementById('avisos-admin').style.display = tipo === "Treinador" ? "block" : "none";
     document.getElementById('boas-vindas').innerText = `Olá, ${nome}`;
     alunaSelecionadaFluxo = "";
-
+// Salva a sessão somente no aplicativo
+if (estaNoApp()) {
+    localStorage.setItem("sessaoRJ", JSON.stringify({
+        usuario: nome,
+        tipo: tipo
+    }));
+}
     atualizarEstruturaMenuLateral();
     if(tipo === "Admin") {
         switchTab('criar-treino');
