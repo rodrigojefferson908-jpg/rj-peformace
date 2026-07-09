@@ -1051,8 +1051,6 @@ document.addEventListener("DOMContentLoaded", () => {
     tipoUsuarioLogado = sessao.tipo;
 
     entrarNoApp(usuarioLogado, tipoUsuarioLogado);
-
-});
  document.getElementById('toggleSenha');
     if(btnToggleSenha) {
         btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
