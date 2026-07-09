@@ -1037,7 +1037,23 @@ window.abrirModal = (id) => {
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
 document.addEventListener('DOMContentLoaded', () => {
-    const btnToggleSenha = document.getElementById('toggleSenha');
+    const btnToggleSenha =
+// Recupera a sessão automaticamente
+document.addEventListener("DOMContentLoaded", () => {
+
+    if (!estaNoApp()) return;
+
+    const sessao = JSON.parse(localStorage.getItem("sessaoRJ"));
+
+    if (!sessao) return;
+
+    usuarioLogado = sessao.usuario;
+    tipoUsuarioLogado = sessao.tipo;
+
+    entrarNoApp(usuarioLogado, tipoUsuarioLogado);
+
+});
+ document.getElementById('toggleSenha');
     if(btnToggleSenha) {
         btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
     }
