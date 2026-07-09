@@ -388,8 +388,9 @@ window.iniciarCronometro = () => {
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
+
 window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
-window.resetarCronometro = () => { clearInterval(cronometroInterval); cronrunning = null; cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
+window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
     if(hiitInterval) return;
@@ -1051,12 +1052,3 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
-
-window.toggleMenuLateral = toggleMenuLateral;
-window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
-window.limparFormularioAluna = limparFormularioAluna;
-window.limparFormularioBiblioteca = limparFormularioBiblioteca;
-window.salvarPlaylist = salvarPlaylist;
-window.carregarPlaylistNoPlayer = carregarPlaylistNoPlayer;
-window.switchTab = switchTab;
-window.cadastrarTreinador = cadastrarTreinador;
