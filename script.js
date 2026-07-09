@@ -252,13 +252,6 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
-    
-    // LOGICA DE AUTO-LOGIN NO APP
-    if (navigator.userAgent.includes('wv')) {
-        localStorage.setItem('usuarioLogado', nome);
-        localStorage.setItem('tipoUsuarioLogado', tipo);
-    }
-
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -276,12 +269,6 @@ function entrarNoApp(nome, tipo) {
 }
 
 window.logout = function() {
-    // APAGA OS DADOS DO AUTO-LOGIN
-    if (navigator.userAgent.includes('wv')) {
-        localStorage.removeItem('usuarioLogado');
-        localStorage.removeItem('tipoUsuarioLogado');
-    }
-
     usuarioLogado = "";
     tipoUsuarioLogado = "";
     document.getElementById('app').style.display = 'none';
@@ -388,9 +375,8 @@ window.iniciarCronometro = () => {
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
-
 window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
-window.resetarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
+window.resetarCronometro = () => { clearInterval(cronometroInterval); cronrunning = null; cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
 
 window.iniciarHiit = () => {
     if(hiitInterval) return;
@@ -1042,13 +1028,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if(btnToggleSenha) {
         btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
     }
-
-    // VERIFICA SESSÃO SALVA AO ABRIR O APP (WEBVIEW)
-    if (navigator.userAgent.includes('wv')) {
-        const userSalvo = localStorage.getItem('usuarioLogado');
-        const tipoSalvo = localStorage.getItem('tipoUsuarioLogado');
-        if (userSalvo && tipoSalvo) {
-            entrarNoApp(userSalvo, tipoSalvo);
-        }
-    }
 });
+
+window.toggleMenuLateral = toggleMenuLateral;
+window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
+window.limparFormularioAluna = limparFormularioAluna;
+window.limparFormularioBiblioteca = limparFormularioBiblioteca;
+window.salvarPlaylist = salvarPlaylist;
+window.carregarPlaylistNoPlayer = carregarPlaylistNoPlayer;
+window.switchTab = switchTab;
+window.cadastrarTreinador = cadastrarTreinador;
