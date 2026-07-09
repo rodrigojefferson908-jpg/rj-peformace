@@ -65,7 +65,6 @@ let memoriaHiitCiclos = 8;
 let memoriaMetroBpm = 60;
 
 window.ferramentaFixaStatus = true;
-window.AppInventor.setWebViewString("TOCAR_SOM");
 
 const ORDEM_DEFINIDA = [
     "AQUECIMENTO", "CARDIO", "MEMBROS INFERIORES", "INFERIORES", 
