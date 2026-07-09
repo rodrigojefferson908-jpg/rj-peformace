@@ -252,6 +252,10 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
+   // ADICIONE ESTAS DUAS LINHAS:
+    localStorage.setItem("usuarioLogado", nome);
+    localStorage.setItem("tipoUsuarioLogado", tipo);
+
     document.getElementById('tela-login').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('app').style.display = 'block';
@@ -271,6 +275,8 @@ function entrarNoApp(nome, tipo) {
 window.logout = function() {
     usuarioLogado = "";
     tipoUsuarioLogado = "";
+localStorage.removeItem("usuarioLogado");
+    localStorage.removeItem("tipoUsuarioLogado");
     document.getElementById('app').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
@@ -642,6 +648,8 @@ window.moverExercicio = (idVinculo, direcao, listaFiltradaJSON) => {
     update(ref(db), atualizacoes);
 };
 
+let primeiraVez = true; // Flag para checar o login automático apenas ao abrir o site
+
 onValue(ref(db, '/'), (snapshot) => {
     const data = snapshot.val();
     biblioteca = data?.biblioteca ? Object.entries(data.biblioteca).map(([id, v]) => ({...v, id})) : [];
@@ -649,6 +657,19 @@ onValue(ref(db, '/'), (snapshot) => {
     treinosDesignados = data?.treinosDesignados ? Object.entries(data.treinosDesignados).map(([id, v]) => ({...v, idVinculo: id})) : [];
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
+    
+    // NOVA VERIFICAÇÃO DE LOGIN:
+    if (primeiraVez) {
+        primeiraVez = false;
+        const usuarioSalvo = localStorage.getItem("usuarioLogado");
+        const tipoSalvo = localStorage.getItem("tipoUsuarioLogado");
+        
+        if (usuarioSalvo && tipoSalvo) {
+            entrarNoApp(usuarioSalvo, tipoSalvo);
+            return; 
+        }
+    }
+    
     renderizar();
 });
 
