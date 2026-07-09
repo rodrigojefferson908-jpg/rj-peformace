@@ -71,6 +71,12 @@ const ORDEM_DEFINIDA = [
     "MEMBROS SUPERIORES", "SUPERIORES", "CORE", "ABDOMINAL", "ALONGAMENTO"
 ];
 
+function estaNoApp() {
+    return navigator.userAgent.includes("wv") ||
+           navigator.userAgent.includes("MIT") ||
+           navigator.userAgent.includes("Android");
+}
+
 function normalizar(texto) {
     return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
