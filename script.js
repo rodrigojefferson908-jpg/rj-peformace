@@ -281,6 +281,7 @@ if (estaNoApp()) {
 }
 
 window.logout = function() {
+localStorage.removeItem("sessaoRJ");
     usuarioLogado = "";
     tipoUsuarioLogado = "";
     document.getElementById('app').style.display = 'none';
