@@ -805,18 +805,17 @@ function renderizar() {
                     </div>`;
                 }
                 return `
-        <div class="card-moderno" onclick="abrirModalFicha('${a.id}')" style="cursor: pointer;">
-            <img src="${a.foto}" alt="Foto Aluna">
-            <div class="info">
-                <h3>${a.nome}</h3>
-                ${anamneseHtml}
-                
-                <div onclick="event.stopPropagation()" style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
-                    <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')"><i class="fas fa-edit"></i> Editar</button>
-                    <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')"><i class="fas fa-trash"></i></button>
-                </div>
-            </div>
-        </div>`;
+<div class="card-moderno" onclick="abrirModalFicha('${a.id}')" style="cursor: pointer;">
+    <img src="${a.foto}" alt="Foto Aluna">
+    <div class="info">
+        <h3>${a.nome}</h3>
+        
+        <div onclick="event.stopPropagation()" style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
+            <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')"><i class="fas fa-edit"></i> Editar</button>
+            <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')"><i class="fas fa-trash"></i></button>
+        </div>
+    </div>
+</div>`;
     }).join('');
 }
 
@@ -1082,20 +1081,36 @@ window.abrirModal = (id) => {
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
 // 1. Função para abrir o modal
-function abrirModalFicha(id) {
-    const aluna = buscarAlunaPorId(id); 
+window.abrirModalFicha = (id) => {
+    const aluna = alunas.find(a => a.id === id); 
+    if(!aluna) return;
+    
     const modal = document.getElementById('modal-ficha');
     const container = document.getElementById('conteudo-modal-ficha');
+
+    // Verifica se a aluna tem anamnese preenchida
+    let detalhes = `<p style="color:#e0e0e0; margin-top:10px;">Anamnese não respondida ainda.</p>`;
     
-    // Insira aqui os dados que você quer mostrar
+    if (aluna.anamnese) {
+        const ana = aluna.anamnese;
+        detalhes = `
+            <div style="margin-top:10px; text-align:left; font-size:0.9rem;">
+                <p><strong>Idade/Sexo:</strong> ${ana.identificacao?.idade || '--'} anos - ${ana.identificacao?.sexo || '--'}</p>
+                <p><strong>Peso/Altura:</strong> ${ana.identificacao?.peso || '--'}kg / ${ana.identificacao?.altura || '--'}m</p>
+                <p><strong>Objetivos:</strong> ${ana.objetivos?.principais?.join(', ') || '--'}</p>
+                <p><strong>Lesões:</strong> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'}</p>
+                <p><strong>Disponibilidade:</strong> ${ana.disponibilidade?.diasSemana || '--'} / ${ana.disponibilidade?.tempoSessao || '--'}</p>
+            </div>
+        `;
+    }
+
     container.innerHTML = `
-        <h3 style="color:#43a047;">${aluna.nome}</h3>
-        <p><strong>Idade:</strong> ${aluna.idade} anos</p>
-        <p><strong>Objetivo:</strong> ${aluna.objetivo}</p>
-        <p><strong>Observações:</strong> ${aluna.observacoes}</p>
+        <h3 style="color:#43a047; text-align:center;">${aluna.nome}</h3>
+        ${detalhes}
     `;
-    modal.style.display = 'flex';
-}
+    
+    if(modal) modal.style.display = 'flex';
+};
 
 // 2. Função para fechar
 function fecharModalFicha() {
