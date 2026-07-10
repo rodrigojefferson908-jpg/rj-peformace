@@ -387,11 +387,10 @@
             <div id="modal-horarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85rem; text-align: left;"></div>
         </div>
     </div>
-<div id="modal-ficha" class="modal-overlay" onclick="fecharModalFicha()">
+<div id="modal-ficha" class="modal-overlay" style="display: none;">
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="fecharModalFicha()">&times;</span>
-        <div id="conteudo-modal-ficha" style="text-align: left; max-height: 80vh; overflow-y: auto;">
-            </div>
+        <div id="conteudo-modal-ficha"></div>
     </div>
 </div>
     <script type="module" src="script.js"></script>
