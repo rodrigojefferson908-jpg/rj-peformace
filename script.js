@@ -1118,6 +1118,9 @@ function renderizarCardAluna(aluna) {
         </div>
     `;
 }
+function buscarAlunaPorId(id) {
+    return alunas.find(a => a.id === id);
+}
 
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
