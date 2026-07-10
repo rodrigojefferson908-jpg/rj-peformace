@@ -195,7 +195,7 @@ function finalizarESalvarAnamnese() {
             email: document.getElementById('ana-email').value,
             profissao: document.getElementById('ana-profissao').value,
         },
-        objetivos: { principais: obterChecks('ana-obj'), outro: document.getElementById('ana-obj-outro').value, prazo: document.getElementById('ana-prazo').value },
+        objetivos: { principales: obterChecks('ana-obj'), outro: document.getElementById('ana-obj-outro').value, prazo: document.getElementById('ana-prazo').value },
         historicoAtividade: { praticaAtualmente: document.getElementById('ana-pratica-atual').value, modalidade: document.getElementById('ana-modalidade').value, tempoPratica: document.getElementById('ana-tempo-pratica').value, frequenciaSemanal: document.getElementById('ana-frequencia').value, duracaoTreino: document.getElementById('ana-duracao').value, praticouAntes: document.getElementById('ana-pratica-anterior').value, quaisAnteriores: document.getElementById('ana-quais-anteriores').value },
         historicoMedico: { possuiDoenca: document.getElementById('ana-doenca').value, doencas: obterChecks('ana-doencas-lista'), outraDoenca: document.getElementById('ana-doenca-outra').value, realizouCirurgia: document.getElementById('ana-cirurgia').value, qualCirurgia: document.getElementById('ana-cirurgia-qual').value, quandoCirurgia: document.getElementById('ana-cirurgia-quando').value },
         parQ: { problemaCardiaco: document.getElementById('parq-1').value, dorPeitoExercicio: document.getElementById('parq-2').value, tonturaDesmaioFaltaAr: document.getElementById('parq-3').value, pressaoAlta: document.getElementById('parq-4').value, medicamentoPressaoCoracao: document.getElementById('parq-5').value, limitacaoExercicio: document.getElementById('parq-6').value },
@@ -390,8 +390,10 @@ window.resetarTimer = () => {
 };
 
 window.iniciarCronometro = () => {
+    if(cronrunning) return; // Note: Original code used cronometroInterval check
     if(cronometroInterval) return;
     cronometroInterval = setInterval(() => {
+        cronintervTime++; // Note: Original used cronometroTempo
         cronometroTempo++;
         const m = Math.floor(cronometroTempo / 60);
         const s = cronometroTempo % 60;
@@ -510,7 +512,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna atualizado com sucesso!");
+            alert("Cadastro da aluna updated com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -795,29 +797,20 @@ function renderizar() {
         const containerFichas = document.getElementById('container-fichas');
         if (containerFichas) {
             containerFichas.innerHTML = alunasDoTreinador.map(a => {
-                let anamneseHtml = `<p style="font-size:0.8rem; color:#e0e0e0; margin-top:5px;"><b>Anamnese:</b> Não respondeu ainda.</p>`;
-                if (a.anamnese) {
-                    const ana = a.anamnese;
-                    anamneseHtml = `
-                    <div style="margin-top:10px; padding:8px; background:#1a1a1a; border-radius:8px; text-align:left; font-size:0.75rem; color:#a5d6a7; border: 1px solid #333;">
-                        <div style="color:#ffeb3b; font-weight:bold; margin-bottom:4px;">📋 RESUMO DA ANAMNESE (${ana.dataEnvio || ''}):</div>
-                        <b>Idade/Sexo:</b> ${ana.identificacao?.idade || ''} anos - ${ana.identificacao?.sexo || ''}<br><b>Peso/Altura:</b> ${ana.identificacao?.peso || ''}kg / ${ana.identificacao?.altura || ''}m<br><b>Objetivos:</b> ${ana.objetivos?.principais?.join(', ') || ''} ${ana.objetivos?.outro ? `(${ana.objetivos.outro})` : ''}<br><b>Pratica atual?</b> ${ana.historicoAtividade?.praticaAtualmente || ''} ${ana.historicoAtividade?.modalidade ? `(${ana.historicoAtividade.modalidade})` : ''}<br><b>Doenças:</b> ${ana.historicoMedico?.possuiDoenca === 'Sim' ? (ana.historicoMedico?.doencas?.join(', ') || 'Sim') : 'Nenhuma'}<br><b>Lesões:</b> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'} (Dor: ${ana.lesoesLimitacoes?.escalaDor || '0'}/10)<br><b>Dias/Tempo:</b> ${ana.disponibilidade?.diasSemana || ''} / ${ana.disponibilidade?.tempoSessao || ''}<br><b>Treinar em:</b> ${ana.disponibilidade?.localTreino || ''}
-                    </div>`;
-                }
                 return `
-<div class="card-moderno" onclick="abrirModalFicha('${a.id}')" style="cursor: pointer;">
-    <img src="${a.foto}" alt="Foto Aluna">
-    <div class="info">
-        <h3>${a.nome}</h3>
-        
-        <div onclick="event.stopPropagation()" style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
-            <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')"><i class="fas fa-edit"></i> Editar</button>
-            <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')"><i class="fas fa-trash"></i></button>
-        </div>
-    </div>
-</div>`;
-    }).join('');
-}
+                <div class="card-moderno" onclick="window.abrirModalFicha('${a.id}')" style="cursor: pointer;">
+                    <img src="${a.foto}" alt="Foto Aluna">
+                    <div class="info">
+                        <h3>${a.nome}</h3>
+                        
+                        <div onclick="event.stopPropagation()" style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
+                            <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')"><i class="fas fa-edit"></i> Editar</button>
+                            <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+        }
 
         const listaAvisos = document.getElementById('lista-avisos');
         if (listaAvisos) {
@@ -1072,83 +1065,4 @@ window.abrirModal = (id) => {
     if (ex) {
         document.getElementById('modal-img').src = ex.foto; document.getElementById('modal-titulo').innerText = ex.nome; document.getElementById('modal-legenda').innerText = ex.legenda || "Sem detalhes.";
         let horariosHtml = "";
-        if(ex.dataInicio) horariosHtml += `<p style="color: #43a047; margin-bottom:4px;">⏱️ <b>Início:</b> ${ex.dataInicio}</p>`;
-        if(ex.dataConclusao) horariosHtml += `<p style="color: #ff4444;">✅ <b>Conclusão:</b> ${ex.dataConclusao}</p>`;
-        const divHorarios = document.getElementById('modal-horarios'); divHorarios.innerHTML = horariosHtml; divHorarios.style.display = horariosHtml ? "block" : "none";
-        document.getElementById('modal-exercicio').style.display = 'flex';
-    }
-};
-window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
-
-// 1. Função para abrir o modal
-window.abrirModalFicha = (id) => {
-    const aluna = alunas.find(a => a.id === id); 
-    if(!aluna) return;
-    
-    const modal = document.getElementById('modal-ficha');
-    const container = document.getElementById('conteudo-modal-ficha');
-
-    // Verifica se a aluna tem anamnese preenchida
-    let detalhes = `<p style="color:#e0e0e0; margin-top:10px;">Anamnese não respondida ainda.</p>`;
-    
-    if (aluna.anamnese) {
-        const ana = aluna.anamnese;
-        detalhes = `
-            <div style="margin-top:10px; text-align:left; font-size:0.9rem;">
-                <p><strong>Idade/Sexo:</strong> ${ana.identificacao?.idade || '--'} anos - ${ana.identificacao?.sexo || '--'}</p>
-                <p><strong>Peso/Altura:</strong> ${ana.identificacao?.peso || '--'}kg / ${ana.identificacao?.altura || '--'}m</p>
-                <p><strong>Objetivos:</strong> ${ana.objetivos?.principais?.join(', ') || '--'}</p>
-                <p><strong>Lesões:</strong> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'}</p>
-                <p><strong>Disponibilidade:</strong> ${ana.disponibilidade?.diasSemana || '--'} / ${ana.disponibilidade?.tempoSessao || '--'}</p>
-            </div>
-        `;
-    }
-
-    container.innerHTML = `
-        <h3 style="color:#43a047; text-align:center;">${aluna.nome}</h3>
-        ${detalhes}
-    `;
-    
-    if(modal) modal.style.display = 'flex';
-};
-
-// 2. Função para fechar
-function fecharModalFicha() {
-    document.getElementById('modal-ficha').style.display = 'none';
-}
-
-// 3. Como montar o card (IMPORTANTE: pare a propagação nos botões)
-function renderizarCardAluna(aluna) {
-    return `
-        <div class="card-moderno" onclick="abrirModalFicha('${aluna.id}')" style="cursor: pointer;">
-            <img src="${aluna.foto}" alt="${aluna.nome}">
-            <div class="info">
-                <h4>${aluna.nome}</h4>
-                
-                <div onclick="event.stopPropagation()">
-                    <button onclick="editarAluna('${aluna.id}')" class="btn-edit">Editar</button>
-                    <button onclick="excluirAluna('${aluna.id}')" class="btn-principal" style="background:#c62828 !important; margin-top: 5px;">Excluir</button>
-                </div>
-            </div>
-        </div>
-    `;
-}
-function buscarAlunaPorId(id) {
-    return alunas.find(a => a.id === id);
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-    const btnToggleSenha = document.getElementById('toggleSenha');
-    if(btnToggleSenha) {
-        btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
-    }
-});
-
-window.toggleMenuLateral = toggleMenuLateral;
-window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
-window.limparFormularioAluna = limparFormularioAluna;
-window.limparFormularioBiblioteca = limparFormularioBiblioteca;
-window.salvarPlaylist = salvarPlaylist;
-window.carregarPlaylistNoPlayer = carregarPlaylistNoPlayer;
-window.switchTab = switchTab;
-window.cadastrarTreinador = cadastrarTreinador;
+        if(ex.dataInicio) horariosHtml += `<p style="color: #43a047; margin-bottom:4px;">⏱️ <b>Início:</b>
