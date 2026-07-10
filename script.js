@@ -1081,35 +1081,42 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
-function renderizarCardAluna(aluna) {
-    return `
-        <div class="card-moderno" onclick="abrirModalFicha('${aluna.id}')">
-            <img src="${aluna.foto}" alt="${aluna.nome}">
-            <div class="info">
-                <h4>${aluna.nome}</h4>
-                <button onclick="editarAluna('${aluna.id}')" class="btn-edit">Editar</button>
-                <button onclick="excluirAluna('${aluna.id}')" class="btn-principal" style="background:#c62828 !important">Excluir</button>
-            </div>
-        </div>
-    `;
-}
-
+// 1. Função para abrir o modal
 function abrirModalFicha(id) {
-    const aluna = buscarAlunaPorId(id); // Sua função de busca
+    const aluna = buscarAlunaPorId(id); 
     const modal = document.getElementById('modal-ficha');
     const container = document.getElementById('conteudo-modal-ficha');
     
+    // Insira aqui os dados que você quer mostrar
     container.innerHTML = `
-        <h3 style="text-align: center;">${aluna.nome}</h3>
-        <div class="item-ficha"><strong>Idade:</strong> ${aluna.idade}</div>
-        <div class="item-ficha"><strong>Objetivo:</strong> ${aluna.objetivo}</div>
-        <div class="item-ficha"><strong>Histórico:</strong> ${aluna.historico}</div>
-        `;
+        <h3 style="color:#43a047;">${aluna.nome}</h3>
+        <p><strong>Idade:</strong> ${aluna.idade} anos</p>
+        <p><strong>Objetivo:</strong> ${aluna.objetivo}</p>
+        <p><strong>Observações:</strong> ${aluna.observacoes}</p>
+    `;
     modal.style.display = 'flex';
 }
 
+// 2. Função para fechar
 function fecharModalFicha() {
     document.getElementById('modal-ficha').style.display = 'none';
+}
+
+// 3. Como montar o card (IMPORTANTE: pare a propagação nos botões)
+function renderizarCardAluna(aluna) {
+    return `
+        <div class="card-moderno" onclick="abrirModalFicha('${aluna.id}')" style="cursor: pointer;">
+            <img src="${aluna.foto}" alt="${aluna.nome}">
+            <div class="info">
+                <h4>${aluna.nome}</h4>
+                
+                <div onclick="event.stopPropagation()">
+                    <button onclick="editarAluna('${aluna.id}')" class="btn-edit">Editar</button>
+                    <button onclick="excluirAluna('${aluna.id}')" class="btn-principal" style="background:#c62828 !important; margin-top: 5px;">Excluir</button>
+                </div>
+            </div>
+        </div>
+    `;
 }
 
 document.addEventListener('DOMContentLoaded', () => {
