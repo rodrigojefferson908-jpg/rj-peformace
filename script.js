@@ -390,10 +390,8 @@ window.resetarTimer = () => {
 };
 
 window.iniciarCronometro = () => {
-    if(cronrunning) return; // Note: Original code used cronometroInterval check
     if(cronometroInterval) return;
     cronometroInterval = setInterval(() => {
-        cronintervTime++; // Note: Original used cronometroTempo
         cronometroTempo++;
         const m = Math.floor(cronometroTempo / 60);
         const s = cronometroTempo % 60;
@@ -512,7 +510,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna updated com sucesso!");
+            alert("Cadastro da aluna atualizado com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -536,7 +534,7 @@ window.limparFormularioAluna = () => {
     document.getElementById('btn-cancelar-edit-aluna').style.display = "none";
 };
 
-window.salvarNaBiblioteca = () => {
+window.modificarBiblioteca = () => { // Note: original code called it salvarNaBiblioteca
     const nome = document.getElementById('lib-nome').value;
     const foto = document.getElementById('lib-foto').value || 'https://via.placeholder.com/300x200';
     const legenda = document.getElementById('lib-legenda').value;
@@ -556,6 +554,7 @@ window.salvarNaBiblioteca = () => {
         });
     }
 };
+window.salvarNaBiblioteca = window.modificarBiblioteca;
 
 window.limparFormularioBiblioteca = () => {
     idEdicaoBiblioteca = null;
@@ -1084,19 +1083,120 @@ window.abrirModalFicha = (id) => {
     
     if (aluna.anamnese) {
         const ana = aluna.anamnese;
-        detalhes = `
-            <div style="margin-top:10px; text-align:left; font-size:0.9rem;">
-                <p><strong>Idade/Sexo:</strong> ${ana.identificacao?.idade || '--'} anos - ${ana.identificacao?.sexo || '--'}</p>
-                <p><strong>Peso/Altura:</strong> ${ana.identificacao?.peso || '--'}kg / ${ana.identificacao?.altura || '--'}m</p>
-                <p><strong>Objetivos:</strong> ${ana.objetivos?.principais?.join(', ') || '--'}</p>
-                <p><strong>Lesões:</strong> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'}</p>
-                <p><strong>Disponibilidade:</strong> ${ana.disponibilidade?.diasSemana || '--'} / ${ana.disponibilidade?.tempoSessao || '--'}</p>
-            </div>
-        `;
+        let htmlAna = "";
+
+        const formatarSecao = (titulo, campos) => {
+            let cont = "";
+            campos.forEach(c => {
+                if (!c.v || c.v === "Não" || (Array.isArray(c.v) && c.v.length === 0)) return;
+                const val = Array.isArray(c.v) ? c.v.join(', ') : c.v;
+                cont += `<p style="margin: 4px 0;"><strong>${c.l}:</strong> ${val}</p>`;
+            });
+            if (!cont) return "";
+            return `<h4 style="color:#43a047; margin-top:14px; margin-bottom:6px; border-bottom:1px solid #333; padding-bottom:3px; text-transform:uppercase; font-size:0.8rem; letter-spacing:0.5px;">${titulo}</h4>${cont}`;
+        };
+
+        if (ana.identificacao) {
+            htmlAna += formatarSecao("Identificação", [
+                { l: "Nome Completo", v: ana.identificacao.nomeCompleto },
+                { l: "Data de Nascimento", v: ana.identificacao.dataNascimento },
+                { l: "Idade", v: ana.identificacao.idade ? `${ana.identificacao.idade} anos` : "" },
+                { l: "Sexo", v: ana.identificacao.sexo },
+                { l: "Altura", v: ana.identificacao.altura ? `${ana.identificacao.altura}m` : "" },
+                { l: "Peso", v: ana.identificacao.peso ? `${ana.identificacao.peso}kg` : "" },
+                { l: "Telefone", v: ana.identificacao.telefone },
+                { l: "E-mail", v: ana.identificacao.email },
+                { l: "Profissão", v: ana.identificacao.profissao }
+            ]);
+        }
+
+        if (ana.objetivos) {
+            htmlAna += formatarSecao("Objetivos", [
+                { l: "Principais Objetivos", v: ana.objetivos.principales || ana.objetivos.principais },
+                { l: "Outro Objetivo", v: ana.objetivos.outro },
+                { l: "Prazo", v: ana.objetivos.prazo }
+            ]);
+        }
+
+        if (ana.historicoAtividade) {
+            htmlAna += formatarSecao("Histórico de Atividade", [
+                { l: "Pratica Atualmente?", v: ana.historicoAtividade.praticaAtualmente },
+                { l: "Modalidade", v: ana.historicoAtividade.modalidade },
+                { l: "Tempo de Prática", v: ana.historicoAtividade.tempoPratica },
+                { l: "Frequência Semanal", v: ana.historicoAtividade.frequenciaSemanal },
+                { l: "Duração do Treino", v: ana.historicoAtividade.duracaoTreino },
+                { l: "Praticou Antes?", v: ana.historicoAtividade.praticouAntes },
+                { l: "Quais Anteriores", v: ana.historicoAtividade.quaisAnteriores }
+            ]);
+        }
+
+        if (ana.historicoMedico) {
+            htmlAna += formatarSecao("Histórico Médico", [
+                { l: "Possui Doença?", v: ana.historicoMedico.possuiDoenca },
+                { l: "Doenças", v: ana.historicoMedico.doencas },
+                { l: "Outra Doença", v: ana.historicoMedico.outraDoenca },
+                { l: "Realizou Cirurgia?", v: ana.historicoMedico.realizouCirurgia },
+                { l: "Qual Cirurgia", v: ana.historicoMedico.qualCirurgia },
+                { l: "Quando realizou", v: ana.historicoMedico.quandoCirurgia }
+            ]);
+        }
+
+        if (ana.parQ) {
+            htmlAna += formatarSecao("Questões de Segurança (PAR-Q)", [
+                { l: "Problema Cardíaco", v: ana.parQ.problemaCardiaco === "Sim" ? "Sim" : "" },
+                { l: "Dor no Peito no Exercício", v: ana.parQ.dorPeitoExercicio === "Sim" ? "Sim" : "" },
+                { l: "Tontura/Desmaio/Falta de Ar", v: ana.parQ.tonturaDesmaioFaltaAr === "Sim" ? "Sim" : "" },
+                { l: "Pressão Alta", v: ana.parQ.pressaoAlta === "Sim" ? "Sim" : "" },
+                { l: "Medicamento Pressão/Coração", v: ana.parQ.medicamentoPressaoCoracao === "Sim" ? "Sim" : "" },
+                { l: "Limitação para Exercício", v: ana.parQ.limitacaoExercicio === "Sim" ? "Sim" : "" }
+            ]);
+        }
+
+        if (ana.lesoesLimitacoes) {
+            htmlAna += formatarSecao("Lesões e Limitações", [
+                { l: "Possui Lesão?", v: ana.lesoesLimitacoes.possuiLesao },
+                { l: "Locais da Lesão", v: ana.lesoesLimitacoes.locais },
+                { l: "Outro Local", v: ana.lesoesLimitacoes.outroLocal },
+                { l: "Sente Dor Atual?", v: ana.lesoesLimitacoes.senteDorAtual },
+                { l: "Escala de Dor", v: ana.lesoesLimitacoes.escalaDor },
+                { l: "Movimento Provoca Dor?", v: ana.lesoesLimitacoes.movimentoProvocaDor },
+                { l: "Qual Movimento", v: ana.lesoesLimitacoes.qualMovimento }
+            ]);
+        }
+
+        if (ana.medicamentosSuplementos) {
+            htmlAna += formatarSecao("Medicamentos e Suplementos", [
+                { l: "Medicamento Contínuo?", v: ana.medicamentosSuplementos.medicamentoContinuo },
+                { l: "Quais Medicamentos", v: ana.medicamentosSuplementos.quaisMedicamentos },
+                { l: "Usa Suplementos?", v: ana.medicamentosSuplementos.usaSuplementos },
+                { l: "Suplementos", v: ana.medicamentosSuplementos.suplementosLista },
+                { l: "Outro Suplemento", v: ana.medicamentosSuplementos.outroSuplemento }
+            ]);
+        }
+
+        if (ana.alimentacao) {
+            htmlAna += formatarSecao("Alimentação", [
+                { l: "Acompanhamento Nutricional?", v: ana.alimentacao.acompanhamentoNutricional }
+            ]);
+        }
+
+        if (ana.disponibilidade) {
+            htmlAna += formatarSecao("Disponibilidade", [
+                { l: "Dias da Semana", v: ana.disponibilidade.diasSemana },
+                { l: "Tempo de Sessão", v: ana.disponibilidade.tempoSessao },
+                { l: "Local de Treino", v: ana.disponibilidade.localTreino }
+            ]);
+        }
+
+        if (ana.dataEnvio) {
+            htmlAna += `<p style="margin-top:20px; font-size:0.75rem; color:#888; text-align:right; font-style:italic;">Respondido em: ${ana.dataEnvio}</p>`;
+        }
+
+        detalhes = htmlAna ? `<div style="margin-top:10px; text-align:left; font-size:0.9rem; max-height:420px; overflow-y:auto; padding-right:8px;">${htmlAna}</div>` : `<p style="color:#e0e0e0; margin-top:10px;">Nenhuma informação relevante registrada na anamnese.</p>`;
     }
 
     container.innerHTML = `
-        <h3 style="color:#43a047; text-align:center;">${aluna.nome}</h3>
+        <h3 style="color:#43a047; text-align:center; margin-bottom:5px;">${aluna.nome}</h3>
         ${detalhes}
     `;
     
