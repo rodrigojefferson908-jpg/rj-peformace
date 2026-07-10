@@ -252,13 +252,10 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
-    
-    // Tratamento de bloqueio no WebView do MIT App Inventor
+
     try {
         localStorage.setItem("usuarioLogado", nome);
         localStorage.setItem("tipoUsuarioLogado", tipo);
-        
-        // Envia para o WebView nativo (TinyDB) se o App Inventor solicitar
         if (window.AppInventor) {
             window.AppInventor.setWebViewString(nome + "|||" + tipo);
         }
@@ -285,8 +282,7 @@ function entrarNoApp(nome, tipo) {
 window.logout = function() {
     usuarioLogado = "";
     tipoUsuarioLogado = "";
-    
-    // Tratamento de erro no logout
+
     try {
         localStorage.removeItem("usuarioLogado");
         localStorage.removeItem("tipoUsuarioLogado");
@@ -294,7 +290,7 @@ window.logout = function() {
             window.AppInventor.setWebViewString(""); 
         }
     } catch (e) {}
-    
+
     document.getElementById('app').style.display = 'none';
     document.getElementById('tela-anamnese').style.display = 'none';
     document.getElementById('tela-login').style.display = 'flex';
@@ -312,7 +308,10 @@ window.logout = function() {
 window.mudarFerramentaAtiva = (novaFerramenta) => {
     salvarConfiguracoesAtuais();
     ferramentaAtiva = novaFerramenta;
-    window.resetarTimer(); window.resetarCronometro(); window.resetarHiit(); window.resetarMetronomo();
+    window.resetarTimer(); 
+    window.resetarCronometro(); 
+    window.resetarHiit(); 
+    window.resetarMetronomo();
     renderizar();
 };
 
@@ -400,7 +399,12 @@ window.iniciarCronometro = () => {
     }, 1000);
 };
 window.pausarCronometro = () => { clearInterval(cronometroInterval); cronometroInterval = null; };
-window.resetarCronometro = () => { clearInterval(cronometroInterval); cronrunning = null; cronometroInterval = null; cronometroTempo = 0; if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; };
+window.resetarCronometro = () => { 
+    clearInterval(cronometroInterval); 
+    cronometroInterval = null; 
+    cronometroTempo = 0; 
+    if(document.getElementById('cronometro-display')) document.getElementById('cronometro-display').innerText = "00:00"; 
+};
 
 window.iniciarHiit = () => {
     if(hiitInterval) return;
@@ -676,13 +680,11 @@ onValue(ref(db, '/'), (snapshot) => {
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
 
-    // VERIFICAÇÃO DE LOGIN COM PROTEÇÃO PARA WEBVIEW
     if (primeiraVez) {
         primeiraVez = false;
         let usuarioSalvo = null;
         let tipoSalvo = null;
 
-        // 1. Tenta recuperar informações do App Inventor via WebViewString
         try {
             if (window.AppInventor) {
                 const dadosApp = window.AppInventor.getWebViewString();
@@ -694,7 +696,6 @@ onValue(ref(db, '/'), (snapshot) => {
             }
         } catch(e) {}
 
-        // 2. Se não veio do App Inventor, tenta do localStorage do navegador
         if (!usuarioSalvo || !tipoSalvo) {
             try {
                 usuarioSalvo = localStorage.getItem("usuarioLogado");
