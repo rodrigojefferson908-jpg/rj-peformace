@@ -429,3 +429,25 @@ input, textarea, select {
     50% { transform: scale(1.18); }
     100% { transform: scale(1); opacity: 1; }
 }
+/* Ajuste no card para ocultar dados detalhados */
+.card-moderno .dados-ocultos {
+    display: none;
+}
+
+/* Estilo do Modal de Ficha */
+#modal-ficha .modal-content {
+    background: #1a1a1a;
+    border: 1px solid #43a047;
+    text-align: left;
+    padding: 25px;
+}
+
+.item-ficha {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    color: #fff;
+}
+
+.item-ficha strong {
+    color: #43a047;
+}
