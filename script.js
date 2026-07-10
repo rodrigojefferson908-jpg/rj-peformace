@@ -1065,4 +1065,61 @@ window.abrirModal = (id) => {
     if (ex) {
         document.getElementById('modal-img').src = ex.foto; document.getElementById('modal-titulo').innerText = ex.nome; document.getElementById('modal-legenda').innerText = ex.legenda || "Sem detalhes.";
         let horariosHtml = "";
-        if(ex.dataInicio) horariosHtml += `<p style="color: #43a047; margin-bottom:4px;">⏱️ <b>Início:</b>
+        if(ex.dataInicio) horariosHtml += `<p style="color: #43a047; margin-bottom:4px;">⏱️ <b>Início:</b> ${ex.dataInicio}</p>`;
+        if(ex.dataConclusao) horariosHtml += `<p style="color: #ff4444;">✅ <b>Conclusão:</b> ${ex.dataConclusao}</p>`;
+        const divHorarios = document.getElementById('modal-horarios'); divHorarios.innerHTML = horariosHtml; divHorarios.style.display = horariosHtml ? "block" : "none";
+        document.getElementById('modal-exercicio').style.display = 'flex';
+    }
+};
+window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
+
+window.abrirModalFicha = (id) => {
+    const aluna = alunas.find(a => a.id === id); 
+    if(!aluna) return;
+    
+    const modal = document.getElementById('modal-ficha');
+    const container = document.getElementById('conteudo-modal-ficha');
+
+    let detalhes = `<p style="color:#e0e0e0; margin-top:10px;">Anamnese não respondida ainda.</p>`;
+    
+    if (aluna.anamnese) {
+        const ana = aluna.anamnese;
+        detalhes = `
+            <div style="margin-top:10px; text-align:left; font-size:0.9rem;">
+                <p><strong>Idade/Sexo:</strong> ${ana.identificacao?.idade || '--'} anos - ${ana.identificacao?.sexo || '--'}</p>
+                <p><strong>Peso/Altura:</strong> ${ana.identificacao?.peso || '--'}kg / ${ana.identificacao?.altura || '--'}m</p>
+                <p><strong>Objetivos:</strong> ${ana.objetivos?.principais?.join(', ') || '--'}</p>
+                <p><strong>Lesões:</strong> ${ana.lesoesLimitacoes?.possuiLesao === 'Sim' ? (ana.lesoesLimitacoes?.locais?.join(', ') || 'Sim') : 'Nenhuma'}</p>
+                <p><strong>Disponibilidade:</strong> ${ana.disponibilidade?.diasSemana || '--'} / ${ana.disponibilidade?.tempoSessao || '--'}</p>
+            </div>
+        `;
+    }
+
+    container.innerHTML = `
+        <h3 style="color:#43a047; text-align:center;">${aluna.nome}</h3>
+        ${detalhes}
+    `;
+    
+    if(modal) modal.style.display = 'flex';
+};
+
+window.fecharModalFicha = () => {
+    const modal = document.getElementById('modal-ficha');
+    if(modal) modal.style.display = 'none';
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const btnToggleSenha = document.getElementById('toggleSenha');
+    if(btnToggleSenha) {
+        btnToggleSenha.addEventListener('click', window.toggleSenhaVisualizacao);
+    }
+});
+
+window.toggleMenuLateral = toggleMenuLateral;
+window.atualizarEstruturaMenuLateral = atualizarEstruturaMenuLateral;
+window.limparFormularioAluna = limparFormularioAluna;
+window.limparFormularioBiblioteca = limparFormularioBiblioteca;
+window.salvarPlaylist = salvarPlaylist;
+window.carregarPlaylistNoPlayer = carregarPlaylistNoPlayer;
+window.switchTab = switchTab;
+window.cadastrarTreinador = cadastrarTreinador;
