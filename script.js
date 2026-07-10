@@ -805,20 +805,20 @@ function renderizar() {
                     </div>`;
                 }
                 return `
-                <div class="card-moderno">
-                    <img src="${a.foto}" alt="Foto Aluna">
-                    <div class="info">
-                        <h3>${a.nome}</h3>
-                        <p>${a.info || 'Sem notas.'}</p>
-                        ${anamneseHtml}
-                        <div style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
-                            <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')" title="Editar dados da aluna"><i class="fas fa-edit"></i> Editar</button>
-                            <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')" title="Excluir aluna"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
-        }
+        <div class="card-moderno" onclick="abrirModalFicha('${a.id}')" style="cursor: pointer;">
+            <img src="${a.foto}" alt="Foto Aluna">
+            <div class="info">
+                <h3>${a.nome}</h3>
+                ${anamneseHtml}
+                
+                <div onclick="event.stopPropagation()" style="margin-top:12px; padding-top:10px; border-top:1px solid #444; display:flex; justify-content:flex-end; gap:5px;">
+                    <button class="btn-edit" onclick="prepararEdicaoAluna('${a.id}')"><i class="fas fa-edit"></i> Editar</button>
+                    <button style="background:#c62828; color:white; border:none; padding:6px 12px; border-radius:8px; cursor:pointer;" onclick="excluirItem('alunas','${a.id}')"><i class="fas fa-trash"></i></button>
+                </div>
+            </div>
+        </div>`;
+    }).join('');
+}
 
         const listaAvisos = document.getElementById('lista-avisos');
         if (listaAvisos) {
