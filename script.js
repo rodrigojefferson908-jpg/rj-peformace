@@ -1081,6 +1081,37 @@ window.abrirModal = (id) => {
 };
 window.fecharModal = () => { document.getElementById('modal-exercicio').style.display = 'none'; };
 
+function renderizarCardAluna(aluna) {
+    return `
+        <div class="card-moderno" onclick="abrirModalFicha('${aluna.id}')">
+            <img src="${aluna.foto}" alt="${aluna.nome}">
+            <div class="info">
+                <h4>${aluna.nome}</h4>
+                <button onclick="editarAluna('${aluna.id}')" class="btn-edit">Editar</button>
+                <button onclick="excluirAluna('${aluna.id}')" class="btn-principal" style="background:#c62828 !important">Excluir</button>
+            </div>
+        </div>
+    `;
+}
+
+function abrirModalFicha(id) {
+    const aluna = buscarAlunaPorId(id); // Sua função de busca
+    const modal = document.getElementById('modal-ficha');
+    const container = document.getElementById('conteudo-modal-ficha');
+    
+    container.innerHTML = `
+        <h3 style="text-align: center;">${aluna.nome}</h3>
+        <div class="item-ficha"><strong>Idade:</strong> ${aluna.idade}</div>
+        <div class="item-ficha"><strong>Objetivo:</strong> ${aluna.objetivo}</div>
+        <div class="item-ficha"><strong>Histórico:</strong> ${aluna.historico}</div>
+        `;
+    modal.style.display = 'flex';
+}
+
+function fecharModalFicha() {
+    document.getElementById('modal-ficha').style.display = 'none';
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const btnToggleSenha = document.getElementById('toggleSenha');
     if(btnToggleSenha) {
