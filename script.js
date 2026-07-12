@@ -534,7 +534,7 @@ window.limparFormularioAluna = () => {
     document.getElementById('btn-cancelar-edit-aluna').style.display = "none";
 };
 
-window.modificarBiblioteca = () => {
+window.modificarBiblioteca = () => { // Note: original code called it salvarNaBiblioteca
     const nome = document.getElementById('lib-nome').value;
     const foto = document.getElementById('lib-foto').value || 'https://via.placeholder.com/300x200';
     const legenda = document.getElementById('lib-legenda').value;
@@ -681,32 +681,6 @@ onValue(ref(db, '/'), (snapshot) => {
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
 
-    // Lógica para escutar e disparar notificação de treino
-    if (tipoUsuarioLogado === "Aluna") {
-        const alunaAtual = alunas.find(a => a.nome === usuarioLogado);
-        if (alunaAtual && alunaAtual.notificacaoPendente) {
-            const msg = alunaAtual.notificacaoPendente;
-            
-            if ("Notification" in window) {
-                if (Notification.permission === "granted") {
-                    new Notification("RJ Performance", { body: msg });
-                } else if (Notification.permission !== "denied") {
-                    Notification.requestPermission().then(p => {
-                        if (p === "granted") new Notification("RJ Performance", { body: msg });
-                    });
-                }
-            }
-
-            try {
-                if (window.AppInventor) {
-                    window.AppInventor.setWebViewString(`NOTIFICACAO|||${msg}`);
-                }
-            } catch (e) {}
-
-            update(ref(db, `alunas/${alunaAtual.id}`), { notificacaoPendente: null });
-        }
-    }
-
     if (primeiraVez) {
         primeiraVez = false;
         let usuarioSalvo = null;
@@ -789,14 +763,6 @@ window.vincularTreinosSelecionados = () => {
     treinosParaSalvar.forEach(treino => {
         push(ref(db, 'treinosDesignados/'), treino);
     });
-
-    // Lógica para enviar a notificação para a aluna
-    const alunaObj = alunas.find(a => a.nome === nomeAluna);
-    if (alunaObj) {
-        update(ref(db, `alunas/${alunaObj.id}`), {
-            notificacaoPendente: "Seu treino está pronto! 💪"
-        });
-    }
 
     alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
 };
