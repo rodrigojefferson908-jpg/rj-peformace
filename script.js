@@ -750,57 +750,92 @@ onValue(ref(db, '/'), (snapshot) => {
 
 window.vincularTreinosSelecionados = () => {
     const nomeAluna = document.getElementById('select-aluna-vinculo').value;
-    const dataSelecionada = document.getElementById('data-treino-vinculo').value;
+    const tipoDesignar = document.getElementById('tipo-designar')?.value || 'unico';
     const selecionados = document.querySelectorAll('.check-exercicio:checked');
 
-    if(!nomeAluna || selecionados.length === 0 || !dataSelecionada) {
-        return alert("Por favor, selecione a aluna, os exercícios e a data do treino!");
+    if (!nomeAluna || selecionados.length === 0) {
+        return alert("Por favor, selecione a aluna e os exercícios!");
     }
 
-    const [ano, mes, dia] = dataSelecionada.split('-'); 
-    const dataFormatada = `${dia}/${mes}/${ano}`;
-    const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
+    // --- MODO 1: TREINO ÚNICO (POR DATA) ---
+    if (tipoDesignar === 'unico') {
+        const dataSelecionada = document.getElementById('data-treino-vinculo').value;
+        if (!dataSelecionada) {
+            return alert("Por favor, selecione a data do treino único!");
+        }
 
-    let maiorOrdem = 0; 
-    exerciciosExistentes.forEach(e => { 
-        if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
-    });
+        const [ano, mes, dia] = dataSelecionada.split('-'); 
+        const dataFormatada = `${dia}/${mes}/${ano}`;
+        const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
 
-    const treinosParaSalvar = [];
-
-    selecionados.forEach((cb, index) => {
-        const id = cb.dataset.id; 
-        const ex = biblioteca.find(e => e.id === id);
-
-        const containerItem = cb.closest('.item-selecao');
-        const inputSeries = containerItem.querySelector(`#series-${id}`);
-        const inputReps = containerItem.querySelector(`#reps-${id}`);
-
-        const inputSeriesVal = inputSeries ? inputSeries.value.trim() : "";
-        const inputRepsVal = inputReps ? inputReps.value.trim() : "";
-
-        const seriesFinal = inputSeriesVal !== "" ? inputSeriesVal : "3";
-        const repsFinal = inputRepsVal !== "" ? inputRepsVal : "12";
-        const stringDetalhes = `${seriesFinal}x${repsFinal}`;
-
-        treinosParaSalvar.push({
-            ...ex, 
-            aluna: nomeAluna, 
-            iniciado: false, 
-            concluido: false, 
-            dataProgramada: dataFormatada, 
-            ordem: maiorOrdem + index + 1,
-            detalhes: stringDetalhes,
-            idTreinador: usuarioLogado
+        let maiorOrdem = 0; 
+        exerciciosExistentes.forEach(e => { 
+            if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
         });
-    });
 
-    treinosParaSalvar.forEach(treino => {
-        push(ref(db, 'treinosDesignados/'), treino);
-    });
+        selecionados.forEach((cb, index) => {
+            const id = cb.dataset.id; 
+            const ex = biblioteca.find(e => e.id === id);
 
-    alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
+            const containerItem = cb.closest('.item-selecao');
+            const inputSeries = containerItem.querySelector(`#series-${id}`);
+            const inputReps = containerItem.querySelector(`#reps-${id}`);
+
+            const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+            const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+            const stringDetalhes = `${seriesFinal}x${repsFinal}`;
+
+            push(ref(db, 'treinosDesignados/'), {
+                ...ex, 
+                aluna: nomeAluna, 
+                iniciado: false, 
+                concluido: false, 
+                dataProgramada: dataFormatada, 
+                ordem: maiorOrdem + index + 1,
+                detalhes: stringDetalhes,
+                idTreinador: usuarioLogado
+            });
+        });
+
+        alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
+    } 
+    
+    // --- MODO 2: DESIGNAR ROTINA (DIAS DA SEMANA) ---
+    else if (tipoDesignar === 'rotina') {
+        const diasMarcados = Array.from(document.querySelectorAll('input[name="dias-rotina"]:checked'))
+            .map(cb => cb.value);
+
+        if (diasMarcados.length === 0) {
+            return alert("Por favor, selecione ao menos um dia da semana para a rotina!");
+        }
+
+        selecionados.forEach((cb, index) => {
+            const id = cb.dataset.id; 
+            const ex = biblioteca.find(e => e.id === id);
+
+            const containerItem = cb.closest('.item-selecao');
+            const inputSeries = containerItem.querySelector(`#series-${id}`);
+            const inputReps = containerItem.querySelector(`#reps-${id}`);
+
+            const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+            const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+            const stringDetalhes = `${seriesFinal}x${repsFinal}`;
+
+            // Salva na coleção 'rotinasDesignadas' para não misturar com treinos de datas específicas
+            push(ref(db, 'rotinasDesignadas/'), {
+                ...ex, 
+                aluna: nomeAluna, 
+                diasSemana: diasMarcados, // Array com os dias escolhidos (Ex: ['Segunda', 'Quarta'])
+                ordem: index + 1,
+                detalhes: stringDetalhes,
+                idTreinador: usuarioLogado
+            });
+        });
+
+        alert(`Rotina semanal vinculada com sucesso para os dias: ${diasMarcados.join(', ')}!`);
+    }
 };
+
 
 function renderizar() {
     const isAdmin = tipoUsuarioLogado === "Admin";
