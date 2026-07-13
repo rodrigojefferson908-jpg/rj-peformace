@@ -47,7 +47,6 @@ let idEdicaoAluna = null;
 let idEdicaoBiblioteca = null;
 let alunaSelecionadaFluxo = "";
 let passoAtualAnamnese = 1;
-let rotinaInstanciadaHoje = false;
 
 let ferramentaAtiva = "timer";
 let timerInterval = null; 
@@ -231,7 +230,6 @@ window.fazerLogin = () => {
         if(aluna) {
             usuarioLogado = aluna.nome;
             tipoUsuarioLogado = "Aluna";
-            rotinaInstanciadaHoje = false;
             if (!aluna.anamnese) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('tela-anamnese').style.display = 'flex';
@@ -254,7 +252,6 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
-    rotinaInstanciadaHoje = false;
 
     try {
         localStorage.setItem("usuarioLogado", nome);
@@ -285,7 +282,6 @@ function entrarNoApp(nome, tipo) {
 window.logout = function() {
     usuarioLogado = "";
     tipoUsuarioLogado = "";
-    rotinaInstanciadaHoje = false;
 
     try {
         localStorage.removeItem("usuarioLogado");
@@ -426,10 +422,10 @@ window.iniciarHiit = () => {
     const statusEl = document.getElementById('hiit-status');
 
     hiitInterval = setInterval(() => {
-        let mudouEstado = false;
+        let mudouOffset = false;
         if(hiitTempoRestante <= 0) {
             dispararSomBuzina();
-            mudouEstado = true;
+            mudouOffset = true;
             if(hiitEstado === "PREPARAR") {
                 hiitEstado = "COMECE!";
                 hiitTempoRestante = pTreino;
@@ -456,7 +452,7 @@ window.iniciarHiit = () => {
             }
         }
 
-        if (mudouEstado || hiitTempoRestante === pPrep - 1) {
+        if (mudouOffset || hiitTempoRestante === pPrep - 1) {
             statusEl.style.animation = 'none'; statusEl.offsetHeight; statusEl.style.animation = null;
         }
 
@@ -514,7 +510,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna updated com sucesso!");
+            alert("Cadastro da aluna atualizado com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -547,7 +543,7 @@ window.modificarBiblioteca = () => {
 
     if(idEdicaoBiblioteca) {
         update(ref(db, `biblioteca/${idEdicaoBiblioteca}`), { nome, foto, legenda, category, categoria: category }).then(() => {
-            alert("Exercício atualizado com sucesso!");
+            alert("Exercício updated com sucesso!");
             limparFormularioBiblioteca();
             switchTab('dados-treino');
         });
@@ -711,8 +707,6 @@ window.vincularRotinaTreino = () => {
     alert(`Rotina de ${diaSemana} vinculada com sucesso para ${nomeAluna}!`);
 };
 
-let primeiraVez = true;
-
 onValue(ref(db, '/'), (snapshot) => {
     const data = snapshot.val();
     biblioteca = data?.biblioteca ? Object.entries(data.biblioteca).map(([id, v]) => ({...v, id})) : [];
@@ -722,64 +716,33 @@ onValue(ref(db, '/'), (snapshot) => {
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     rotinasTreino = data?.rotinasTreino ? Object.entries(data.rotinasTreino).map(([id, v]) => ({...v, idRotina: id})) : [];
 
-    if (primeiraVez) {
-        primeiraVez = false;
-        let usuarioSalvo = null;
-        let tipoSalvo = null;
-
-        try {
-            if (window.AppInventor) {
-                const dadosApp = window.AppInventor.getWebViewString();
-                if (dadosApp && dadosApp.includes("|||")) {
-                    const partes = dadosApp.split("|||");
-                    usuarioSalvo = partes[0];
-                    tipoSalvo = partes[1];
-                }
-            }
-        } catch(e) {}
-
-        if (!usuarioSalvo || !tipoSalvo) {
-            try {
-                usuarioSalvo = localStorage.getItem("usuarioLogado");
-                tipoSalvo = localStorage.getItem("tipoUsuarioLogado");
-            } catch (e) {}
-        }
-
-        if (usuarioSalvo && tipoSalvo) {
-            entrarNoApp(usuarioSalvo, tipoSalvo);
-            return; 
-        }
-    }
-
-    if (tipoUsuarioLogado === "Aluna" && !rotinaInstanciadaHoje) {
+    const alvoCheck = tipoUsuarioLogado === "Aluna" ? usuarioLogado : alunaSelecionadaFluxo;
+    if (alvoCheck) {
         const hojeString = new Date().toLocaleDateString('pt-BR');
         const hojeSemanaNum = new Date().getDay(); 
         const diasMapa = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
         const diaSemanaTexto = diasMapa[hojeSemanaNum];
 
-        const jaTemTreinoHoje = treinosDesignados.some(t => t.aluna === usuarioLogado && t.dataProgramada === hojeString);
-
-        if (!jaTemTreinoHoje) {
-            const rotinasHoje = rotinasTreino.filter(r => r.aluna === usuarioLogado && r.diaSemana === diaSemanaTexto);
-            if (rotinasHoje.length > 0) {
-                rotinaInstanciadaHoje = true; 
-                rotinasHoje.forEach(r => {
-                    push(ref(db, 'treinosDesignados/'), {
-                        nome: r.nome,
-                        foto: r.foto,
-                        legenda: r.legenda || "",
-                        categoria: r.categoria || r.category || "",
-                        detalhes: r.detalhes,
-                        aluna: r.aluna,
-                        iniciado: false,
-                        concluido: false,
-                        dataProgramada: hojeString,
-                        ordem: r.ordem || 1,
-                        idTreinador: r.idTreinador
-                    });
+        const rotinasHoje = rotinasTreino.filter(r => r.aluna === alvoCheck && r.diaSemana === diaSemanaTexto);
+        rotinasHoje.forEach(r => {
+            const jaInstanciado = treinosDesignados.some(t => t.aluna === alvoCheck && t.dataProgramada === hojeString && t.idRotinaOrigem === r.idRotina);
+            if (!jaInstanciado) {
+                push(ref(db, 'treinosDesignados/'), {
+                    nome: r.nome,
+                    foto: r.foto,
+                    legenda: r.legenda || "",
+                    categoria: r.categoria || r.category || "",
+                    detalhes: r.detalhes,
+                    aluna: r.aluna,
+                    iniciado: false,
+                    concluido: false,
+                    dataProgramada: hojeString,
+                    ordem: r.ordem || 1,
+                    idTreinador: r.idTreinador,
+                    idRotinaOrigem: r.idRotina
                 });
             }
-        }
+        });
     }
 
     renderizar();
@@ -836,7 +799,7 @@ window.vincularTreinosSelecionados = () => {
         push(ref(db, 'treinosDesignados/'), treino);
     });
 
-    alert(`Treinos vinculados com sucesso para o dia ${dataFormatada}!`);
+    alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
 };
 
 function renderizar() {
@@ -914,7 +877,7 @@ function renderizar() {
                     <button onclick="voltarParaAlunas()" class="btn-principal" style="width: auto; padding: 5px 15px; background: #666; margin-bottom:10px;"><i class="fas fa-arrow-left"></i> Voltar</button>
                 `;
             }
-            filtrados = treinosDesignados.filter(t => t.aluna === alunaSelecionadaFluxo);
+            filtrados = treinosDesignados.filter(t => t.aluna === alunaSelecionadaFluxo && t.dataProgramada === hojeString);
         }
     } else if (tipoUsuarioLogado === "Aluna") {
         if(subTelaAlunas) subTelaAlunas.style.display = "none";
@@ -1037,11 +1000,16 @@ function renderizar() {
                 if (!t.iniciado) botaoAcaoHtml = `<button onclick="event.stopPropagation(); marcarInicio('${t.idVinculo}')" class="btn-principal btn-iniciar">Iniciar</button>`;
                 else botaoAcaoHtml = `<button onclick="event.stopPropagation(); marcarFeito('${t.idVinculo}')" class="btn-principal btn-concluir">Concluir</button>`;
             }
+            const tagTipo = t.idRotinaOrigem ? `<span style="font-size:0.55rem; background:#ff9800; color:white; padding:1px 4px; border-radius:3px; margin-left:5px;">ROTINA</span>` : `<span style="font-size:0.55rem; background:#2196f3; color:white; padding:1px 4px; border-radius:3px; margin-left:5px;">ÚNICO</span>`;
+            
             return `
             <div class="card-moderno ${t.concluido ? 'concluido' : ''}" onclick="abrirModal('${t.idVinculo || t.id}')" style="cursor:pointer;">
                 <img src="${t.foto}" alt="Exercício">
                 <div class="info">
-                    <span style="font-size: 0.65rem; color: #fff; background: var(--verde-principal); padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${t.categoria || t.category}</span>
+                    <div style="display:flex; gap:3px; align-items:center;">
+                        <span style="font-size: 0.65rem; color: #fff; background: var(--verde-principal); padding: 2px 6px; border-radius: 4px; text-transform: uppercase;">${t.categoria || t.category}</span>
+                        ${tagTipo}
+                    </div>
                     <h4 style="margin-top: 5px;">${t.nome}</h4>
                     <span class="detalhe-badge">${t.detalhes}</span>
                     ${t.iniciado ? `<div class="inicio-txt">⏱️ Início: ${t.dataInicio}</div>` : ''}
@@ -1069,7 +1037,7 @@ function renderizar() {
         const rotinasAluna = rotinasTreino.filter(r => r.aluna === alunaSelecionadaFluxo);
         htmlRotinas = `
             <div style="width:100%; margin-top:30px; border-top:2px dashed #43a047; padding-top:15px;">
-                <h3 style="color:#43a047; font-size:1.1rem; margin-bottom:12px; text-align:center;"><i class="fas fa-calendar-alt"></i> Rotina Semanal Fixa (Segunda a Sexta)</h3>
+                <h3 style="color:#43a047; font-size:1.1rem; margin-bottom:12px; text-align:center;"><i class="fas fa-calendar-alt"></i> Rotina Semanal Fixa (Repetitiva)</h3>
                 ${rotinasAluna.length === 0 ? '<p style="color:#aaa; text-align:center; font-size:0.85rem; padding: 15px;">Nenhuma rotina fixa cadastrada para esta aluna.</p>' : `
                     <div class="grid-moderno">
                         ${rotinasAluna.map(r => `
