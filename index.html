@@ -283,15 +283,40 @@
 
             <section id="aba-designar" class="tab-content" style="display:none;">
                 <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
-                    <h3><i class="fas fa-tasks"></i> Designar Treinos</h3>
+                    <h3><i class="fas fa-tasks"></i> Designar Treinos e Rotinas</h3>
+                    
                     <select id="select-aluna-vinculo">
                         <option value="">Selecione a aluna...</option>
                     </select>
-                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Data Programada para o Treino:</label>
-                    <input type="date" id="data-treino-vinculo" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
-                    
+
+                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Tipo de Designação:</label>
+                    <select id="tipo-designar" onchange="document.getElementById('container-treino-unico').style.display = this.value === 'unico' ? 'block' : 'none'; document.getElementById('container-designar-rotina').style.display = this.value === 'rotina' ? 'block' : 'none';" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
+                        <option value="unico">Treino Único (Data Específica)</option>
+                        <option value="rotina">Designar Rotina (Dias da Semana)</option>
+                    </select>
+
+                    <div id="container-treino-unico">
+                        <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Data Programada para o Treino:</label>
+                        <input type="date" id="data-treino-vinculo" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
+                    </div>
+
+                    <div id="container-designar-rotina" style="display: none; margin-bottom: 12px;">
+                        <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 8px;">Selecione os dias da semana para esta rotina:</label>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; color: white; font-size: 0.9rem;">
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Segunda"> Segunda-Feira</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Terça"> Terça-Feira</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Quarta"> Quarta-Feira</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Quinta"> Quinta-Feira</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Sexta"> Sexta-Feira</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Sábado"> Sábado</div>
+                            <div class="check-group"><input type="checkbox" name="dias-rotina" value="Domingo"> Domingo</div>
+                        </div>
+                    </div>
+
+                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 15px; margin-bottom: 5px;">Selecione os Treinos desejados:</label>
                     <div id="lista-selecao-multipla" class="lista-multipla"></div>
-                    <button onclick="vincularTreinosSelecionados()" class="btn-principal">Enviar para Rotina</button>
+                    
+                    <button onclick="vincularTreinosSelecionados()" class="btn-principal" style="margin-top: 15px;">Salvar Configuração</button>
                 </div>
             </section>
 
@@ -387,12 +412,14 @@
             <div id="modal-horarios" style="margin-top: 15px; padding-top: 10px; border-top: 1px solid #444; font-size: 0.85rem; text-align: left;"></div>
         </div>
     </div>
-<div id="modal-ficha" class="modal-overlay" style="display: none;">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="modal-close" onclick="fecharModalFicha()">&times;</span>
-        <div id="conteudo-modal-ficha"></div>
+
+    <div id="modal-ficha" class="modal-overlay" style="display: none;">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="modal-close" onclick="fecharModalFicha()">&times;</span>
+            <div id="conteudo-modal-ficha"></div>
+        </div>
     </div>
-</div>
+
     <script type="module" src="script.js"></script>
 </body>
 </html>
