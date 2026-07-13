@@ -42,11 +42,12 @@ function dispararSomBuzina() {
     }
 }
 
-let biblioteca = [], alunas = [], treinosDesignados = [], playlists = [], treinadores = [], usuarioLogado = "", tipoUsuarioLogado = "";
+let biblioteca = [], alunas = [], treinosDesignados = [], playlists = [], treinadores = [], usuarioLogado = "", tipoUsuarioLogado = "", rotinasTreino = [];
 let idEdicaoAluna = null;
 let idEdicaoBiblioteca = null;
 let alunaSelecionadaFluxo = "";
 let passoAtualAnamnese = 1;
+let rotinaInstanciadaHoje = false;
 
 let ferramentaAtiva = "timer";
 let timerInterval = null; 
@@ -230,6 +231,7 @@ window.fazerLogin = () => {
         if(aluna) {
             usuarioLogado = aluna.nome;
             tipoUsuarioLogado = "Aluna";
+            rotinaInstanciadaHoje = false;
             if (!aluna.anamnese) {
                 document.getElementById('tela-login').style.display = 'none';
                 document.getElementById('tela-anamnese').style.display = 'flex';
@@ -252,6 +254,7 @@ window.fazerLogin = () => {
 function entrarNoApp(nome, tipo) {
     usuarioLogado = nome;
     tipoUsuarioLogado = tipo;
+    rotinaInstanciadaHoje = false;
 
     try {
         localStorage.setItem("usuarioLogado", nome);
@@ -282,6 +285,7 @@ function entrarNoApp(nome, tipo) {
 window.logout = function() {
     usuarioLogado = "";
     tipoUsuarioLogado = "";
+    rotinaInstanciadaHoje = false;
 
     try {
         localStorage.removeItem("usuarioLogado");
@@ -510,7 +514,7 @@ window.cadastrarAluna = () => {
 
     if(idEdicaoAluna) {
         update(ref(db, `alunas/${idEdicaoAluna}`), { nome, senha, foto, info }).then(() => {
-            alert("Cadastro da aluna atualizado com sucesso!");
+            alert("Cadastro da aluna updated com sucesso!");
             limparFormularioAluna();
             switchTab('fichas');
         });
@@ -534,7 +538,7 @@ window.limparFormularioAluna = () => {
     document.getElementById('btn-cancelar-edit-aluna').style.display = "none";
 };
 
-window.modificarBiblioteca = () => { // Note: original code called it salvarNaBiblioteca
+window.modificarBiblioteca = () => { 
     const nome = document.getElementById('lib-nome').value;
     const foto = document.getElementById('lib-foto').value || 'https://via.placeholder.com/300x200';
     const legenda = document.getElementById('lib-legenda').value;
@@ -671,6 +675,42 @@ window.moverExercicio = (idVinculo, direcao, listaFiltradaJSON) => {
     update(ref(db), atualizacoes);
 };
 
+window.vincularRotinaTreino = () => {
+    const nomeAluna = document.getElementById('select-aluna-vinculo').value;
+    const diaSemana = document.getElementById('select-dia-rotina')?.value;
+    const selecionados = document.querySelectorAll('.check-exercicio:checked');
+
+    if(!nomeAluna || selecionados.length === 0 || !diaSemana) {
+        return alert("Por favor, selecione a aluna, os exercícios e o dia da semana para a rotina!");
+    }
+
+    const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && r.diaSemana === diaSemana);
+    let maiorOrdem = 0; 
+    rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
+
+    selecionados.forEach((cb, index) => {
+        const id = cb.dataset.id; 
+        const ex = biblioteca.find(e => e.id === id);
+        const containerItem = cb.closest('.item-selecao');
+        const inputSeries = containerItem.querySelector(`#series-${id}`);
+        const inputReps = containerItem.querySelector(`#reps-${id}`);
+
+        const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+        const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+
+        push(ref(db, 'rotinasTreino/'), {
+            ...ex, 
+            aluna: nomeAluna, 
+            diaSemana: diaSemana,
+            ordem: maiorOrdem + index + 1,
+            detalhes: `${seriesFinal}x${repsFinal}`,
+            idTreinador: usuarioLogado
+        });
+    });
+
+    alert(`Rotina de ${diaSemana} vinculada com sucesso para ${nomeAluna}!`);
+};
+
 let primeiraVez = true;
 
 onValue(ref(db, '/'), (snapshot) => {
@@ -680,6 +720,7 @@ onValue(ref(db, '/'), (snapshot) => {
     treinosDesignados = data?.treinosDesignados ? Object.entries(data.treinosDesignados).map(([id, v]) => ({...v, idVinculo: id})) : [];
     playlists = data?.playlists ? Object.entries(data.playlists).map(([id, v]) => ({...v, id})) : [];
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
+    rotinasTreino = data?.rotinasTreino ? Object.entries(data.rotinasTreino).map(([id, v]) => ({...v, idRotina: id})) : [];
 
     if (primeiraVez) {
         primeiraVez = false;
@@ -707,6 +748,37 @@ onValue(ref(db, '/'), (snapshot) => {
         if (usuarioSalvo && tipoSalvo) {
             entrarNoApp(usuarioSalvo, tipoSalvo);
             return; 
+        }
+    }
+
+    if (tipoUsuarioLogado === "Aluna" && !rotinaInstanciadaHoje) {
+        const hojeString = new Date().toLocaleDateString('pt-BR');
+        const hojeSemanaNum = new Date().getDay(); 
+        const diasMapa = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+        const diaSemanaTexto = diasMapa[hojeSemanaNum];
+
+        const jaTemTreinoHoje = treinosDesignados.some(t => t.aluna === usuarioLogado && t.dataProgramada === hojeString);
+
+        if (!jaTemTreinoHoje) {
+            const rotinasHoje = rotinasTreino.filter(r => r.aluna === usuarioLogado && r.diaSemana === diaSemanaTexto);
+            if (rotinasHoje.length > 0) {
+                rotinaInstanciadaHoje = true; 
+                rotinasHoje.forEach(r => {
+                    push(ref(db, 'treinosDesignados/'), {
+                        nome: r.nome,
+                        foto: r.foto,
+                        legenda: r.legenda || "",
+                        categoria: r.categoria || r.category || "",
+                        detalhes: r.detalhes,
+                        aluna: r.aluna,
+                        iniciado: false,
+                        concluido: false,
+                        dataProgramada: hojeString,
+                        ordem: r.ordem || 1,
+                        idTreinador: r.idTreinador
+                    });
+                });
+            }
         }
     }
 
@@ -992,7 +1064,35 @@ function renderizar() {
         }).join('') + `</div>`;
     }
 
-    if (container) container.innerHTML = `${htmlTopo}${htmlFinalCards}`;
+    let htmlRotinas = "";
+    if (isTreinador && alunaSelecionadaFluxo) {
+        const rotinasAluna = rotinasTreino.filter(r => r.aluna === alunaSelecionadaFluxo);
+        htmlRotinas = `
+            <div style="width:100%; margin-top:30px; border-top:2px dashed #43a047; padding-top:15px;">
+                <h3 style="color:#43a047; font-size:1.1rem; margin-bottom:12px; text-align:center;"><i class="fas fa-calendar-alt"></i> Rotina Semanal Fixa (Segunda a Sexta)</h3>
+                ${rotinasAluna.length === 0 ? '<p style="color:#aaa; text-align:center; font-size:0.85rem; padding: 15px;">Nenhuma rotina fixa cadastrada para esta aluna.</p>' : `
+                    <div class="grid-moderno">
+                        ${rotinasAluna.map(r => `
+                            <div class="card-moderno" style="border: 1px solid #ff9800 !important;">
+                                <img src="${r.foto}" alt="Exercício">
+                                <div class="info">
+                                    <span style="font-size: 0.65rem; color: #fff; background: #ff9800; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; font-weight:bold;">${r.diaSemana}</span>
+                                    <h4 style="margin-top: 5px;">${r.nome}</h4>
+                                    <span class="detalhe-badge">${r.detalhes}</span>
+                                    <div style="margin-top:10px; border-top:1px solid #444; padding-top:5px; display:flex; justify-content:space-between; align-items:center;">
+                                        <small style="color:#ff9800 !important;">${r.categoria || r.category}</small>
+                                        <button onclick="event.stopPropagation(); excluirItem('rotinasTreino','${r.idRotina}')" style="color:#ff5252; background:none; border:none; cursor:pointer; font-size:0.75rem; font-weight:bold;"><i class="fas fa-trash"></i> Remover</button>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                `}
+            </div>
+        `;
+    }
+
+    if (container) container.innerHTML = `${htmlTopo}${htmlFinalCards}${htmlRotinas}`;
 
     window.executarRenderizacoesFinais(isAdmin, isTreinador, biblioteca);
 }
@@ -1075,12 +1175,12 @@ window.fecharModal = () => { document.getElementById('modal-exercicio').style.di
 window.abrirModalFicha = (id) => {
     const aluna = alunas.find(a => a.id === id); 
     if(!aluna) return;
-    
+
     const modal = document.getElementById('modal-ficha');
     const container = document.getElementById('conteudo-modal-ficha');
 
     let detalhes = `<p style="color:#e0e0e0; margin-top:10px;">Anamnese não respondida ainda.</p>`;
-    
+
     if (aluna.anamnese) {
         const ana = aluna.anamnese;
         let htmlAna = "";
@@ -1199,7 +1299,7 @@ window.abrirModalFicha = (id) => {
         <h3 style="color:#43a047; text-align:center; margin-bottom:5px;">${aluna.nome}</h3>
         ${detalhes}
     `;
-    
+
     if(modal) modal.style.display = 'flex';
 };
 
