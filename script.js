@@ -394,7 +394,7 @@ window.iniciarCronometro = () => {
     cronometroInterval = setInterval(() => {
         cronometroTempo++;
         const m = Math.floor(cronometroTempo / 60);
-        const s = cronometroTempo % 60;
+        const s = cronoverflowTempo = cronometroTempo % 60;
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
@@ -799,7 +799,7 @@ window.vincularTreinosSelecionados = () => {
 
         alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
     } 
-    
+
     // --- MODO 2: DESIGNAR ROTINA (DIAS DA SEMANA) ---
     else if (tipoDesignar === 'rotina') {
         const diasMarcados = Array.from(document.querySelectorAll('input[name="dias-rotina"]:checked'))
@@ -809,33 +809,37 @@ window.vincularTreinosSelecionados = () => {
             return alert("Por favor, selecione ao menos um dia da semana para a rotina!");
         }
 
-        selecionados.forEach((cb, index) => {
-            const id = cb.dataset.id; 
-            const ex = biblioteca.find(e => e.id === id);
+        diasMarcados.forEach(dia => {
+            const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && r.diaSemana === dia);
+            let maiorOrdem = 0; 
+            rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
 
-            const containerItem = cb.closest('.item-selecao');
-            const inputSeries = containerItem.querySelector(`#series-${id}`);
-            const inputReps = containerItem.querySelector(`#reps-${id}`);
+            selecionados.forEach((cb, index) => {
+                const id = cb.dataset.id; 
+                const ex = biblioteca.find(e => e.id === id);
 
-            const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
-            const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
-            const stringDetalhes = `${seriesFinal}x${repsFinal}`;
+                const containerItem = cb.closest('.item-selecao');
+                const inputSeries = containerItem.querySelector(`#series-${id}`);
+                const inputReps = containerItem.querySelector(`#reps-${id}`);
 
-            // Salva na coleção 'rotinasDesignadas' para não misturar com treinos de datas específicas
-            push(ref(db, 'rotinasDesignadas/'), {
-                ...ex, 
-                aluna: nomeAluna, 
-                diasSemana: diasMarcados, // Array com os dias escolhidos (Ex: ['Segunda', 'Quarta'])
-                ordem: index + 1,
-                detalhes: stringDetalhes,
-                idTreinador: usuarioLogado
+                const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+                const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+                const stringDetalhes = `${seriesFinal}x${repsFinal}`;
+
+                push(ref(db, 'rotinasTreino/'), {
+                    ...ex, 
+                    aluna: nomeAluna, 
+                    diaSemana: dia, 
+                    ordem: maiorOrdem + index + 1,
+                    detalhes: stringDetalhes,
+                    idTreinador: usuarioLogado
+                });
             });
         });
 
         alert(`Rotina semanal vinculada com sucesso para os dias: ${diasMarcados.join(', ')}!`);
     }
 };
-
 
 function renderizar() {
     const isAdmin = tipoUsuarioLogado === "Admin";
@@ -1036,7 +1040,7 @@ function renderizar() {
                 else botaoAcaoHtml = `<button onclick="event.stopPropagation(); marcarFeito('${t.idVinculo}')" class="btn-principal btn-concluir">Concluir</button>`;
             }
             const tagTipo = t.idRotinaOrigem ? `<span style="font-size:0.55rem; background:#ff9800; color:white; padding:1px 4px; border-radius:3px; margin-left:5px;">ROTINA</span>` : `<span style="font-size:0.55rem; background:#2196f3; color:white; padding:1px 4px; border-radius:3px; margin-left:5px;">ÚNICO</span>`;
-            
+
             return `
             <div class="card-moderno ${t.concluido ? 'concluido' : ''}" onclick="abrirModal('${t.idVinculo || t.id}')" style="cursor:pointer;">
                 <img src="${t.foto}" alt="Exercício">
