@@ -596,7 +596,7 @@ window.modificarBiblioteca = () => {
         });
     } else {
         push(ref(db, 'biblioteca/'), { nome, foto, legenda, categoria: category, category }).then(() => {
-            alert("Exercício saved na biblioteca geral!");
+            alert("Exercício salvo na biblioteca geral!");
             limparFormularioBiblioteca();
         });
     }
