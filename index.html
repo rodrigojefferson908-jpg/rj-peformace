@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
@@ -118,7 +117,7 @@
 
                 <div class="passo-anamnese" id="passo-5" style="display:none;">
                     <h3>5. Saúde Cardiovascular (PAR-Q)</h3>
-                    <label style="color:white;">Seu médico já informou que você possui algum problem cardíaco?</label>
+                    <label style="color:white;">Seu médico já informou que você possui algum problema cardíaco?</label>
                     <select id="parq-1"><option value="Não">Não</option><option value="Sim">Sim</option></select>
                     <label style="color:white;">Sente dor ou desconforto no peito durante exercícios?</label>
                     <select id="parq-2"><option value="Não">Não</option><option value="Sim">Sim</option></select>
@@ -285,9 +284,9 @@
             <section id="aba-designar" class="tab-content" style="display:none;">
                 <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
                     <h3><i class="fas fa-tasks"></i> Designar Treinos e Rotinas</h3>
-                    
-                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Selecione a(s) Aluna(s):</label>
-                    <div id="lista-selecao-multipla-alunas" class="lista-multipla" style="margin-bottom: 15px; max-height: 150px; overflow-y: auto;"></div>
+
+                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Selecione a Aluna:</label>
+                    <select id="select-aluna-vinculo" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;"></select>
 
                     <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Tipo de Designação:</label>
                     <select id="tipo-designar" onchange="document.getElementById('container-treino-unico').style.display = this.value === 'unico' ? 'block' : 'none'; document.getElementById('container-designar-rotina').style.display = this.value === 'rotina' ? 'block' : 'none';" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
@@ -315,7 +314,7 @@
 
                     <label style="color: white; font-size: 0.8rem; display: block; margin-top: 15px; margin-bottom: 5px;">Selecione os Treinos desejados:</label>
                     <div id="lista-selecao-multipla" class="lista-multipla"></div>
-                    
+
                     <button onclick="vincularTreinosSelecionados()" class="btn-principal" style="margin-top: 15px;">Salvar Configuração</button>
                 </div>
             </section>
