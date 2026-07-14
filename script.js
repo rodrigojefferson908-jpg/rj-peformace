@@ -75,7 +75,6 @@ function normalizar(texto) {
     return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
 
-// Remove acentos, cedilhas, traços e padroniza para evitar falhas na comparação de dias da semana
 function normalizarDia(dia) {
     if (!dia) return "";
     return dia.toLowerCase()
@@ -85,7 +84,6 @@ function normalizarDia(dia) {
               .trim();
 }
 
-// Verifica se há rotinas cadastradas para hoje e gera o treino físico da aluna se ainda não existir
 function verificarEInstanciarRotinasDoDia() {
     const alvoCheck = tipoUsuarioLogado === "Aluna" ? usuarioLogado : alunaSelecionadaFluxo;
     if (!alvoCheck) return;
@@ -96,7 +94,7 @@ function verificarEInstanciarRotinasDoDia() {
     const diaSemanaTexto = diasMapa[hojeSemanaNum];
 
     const rotinasHoje = rotinasTreino.filter(r => r.aluna === alvoCheck && normalizarDia(r.diaSemana) === normalizarDia(diaSemanaTexto));
-    
+
     rotinasHoje.forEach(r => {
         const jaInstanciado = treinosDesignados.some(t => t.aluna === alvoCheck && t.dataProgramada === hojeString && t.idRotinaOrigem === r.idRotina);
         if (!jaInstanciado) {
@@ -316,8 +314,6 @@ function entrarNoApp(nome, tipo) {
     alunaSelecionadaFluxo = "";
 
     atualizarEstruturaMenuLateral();
-    
-    // Força a verificação e instanciação do treino de hoje no exato momento em que entra no app
     verificarEInstanciarRotinasDoDia();
 
     if(tipo === "Admin") {
@@ -704,7 +700,6 @@ window.excluirItem = (pasta, id) => {
 
 window.selecionarAlunaFluxo = (nomeAluna) => { 
     alunaSelecionadaFluxo = nomeAluna; 
-    // Garante a geração da rotina de hoje no momento em que o treinador abre a aluna
     verificarEInstanciarRotinasDoDia();
     renderizar(); 
 };
@@ -726,39 +721,41 @@ window.moverExercicio = (idVinculo, direcao, listaFiltradaJSON) => {
 };
 
 window.vincularRotinaTreino = () => {
-    const nomeAluna = document.getElementById('select-aluna-vinculo').value;
+    const selecionadasAlunas = Array.from(document.querySelectorAll('.check-aluna:checked')).map(cb => cb.dataset.nome);
     const diaSemana = document.getElementById('select-dia-rotina')?.value;
     const selecionados = document.querySelectorAll('.check-exercicio:checked');
 
-    if(!nomeAluna || selecionados.length === 0 || !diaSemana) {
-        return alert("Por favor, selecione a aluna, os exercícios e o dia da semana para a rotina!");
+    if(selecionadasAlunas.length === 0 || selecionados.length === 0 || !diaSemana) {
+        return alert("Por favor, selecione as alunas, os exercícios e o dia da semana para a rotina!");
     }
 
-    const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(diaSemana));
-    let maiorOrdem = 0; 
-    rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
+    selecionadasAlunas.forEach(nomeAluna => {
+        const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(diaSemana));
+        let maiorOrdem = 0; 
+        rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
 
-    selecionados.forEach((cb, index) => {
-        const id = cb.dataset.id; 
-        const ex = biblioteca.find(e => e.id === id);
-        const containerItem = cb.closest('.item-selecao');
-        const inputSeries = containerItem.querySelector(`#series-${id}`);
-        const inputReps = containerItem.querySelector(`#reps-${id}`);
+        selecionados.forEach((cb, index) => {
+            const id = cb.dataset.id; 
+            const ex = biblioteca.find(e => e.id === id);
+            const containerItem = cb.closest('.item-selecao');
+            const inputSeries = containerItem.querySelector(`#series-${id}`);
+            const inputReps = containerItem.querySelector(`#reps-${id}`);
 
-        const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
-        const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+            const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+            const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
 
-        push(ref(db, 'rotinasTreino/'), {
-            ...ex, 
-            aluna: nomeAluna, 
-            diaSemana: diaSemana,
-            ordem: maiorOrdem + index + 1,
-            detalhes: `${seriesFinal}x${repsFinal}`,
-            idTreinador: usuarioLogado
+            push(ref(db, 'rotinasTreino/'), {
+                ...ex, 
+                aluna: nomeAluna, 
+                diaSemana: diaSemana,
+                ordem: maiorOrdem + index + 1,
+                detalhes: `${seriesFinal}x${repsFinal}`,
+                idTreinador: usuarioLogado
+            });
         });
     });
 
-    alert(`Rotina de ${diaSemana} vinculada com sucesso para ${nomeAluna}!`);
+    alert(`Rotina de ${diaSemana} vinculada com sucesso!`);
 };
 
 onValue(ref(db, '/'), (snapshot) => {
@@ -770,21 +767,22 @@ onValue(ref(db, '/'), (snapshot) => {
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     rotinasTreino = data?.rotinasTreino ? Object.entries(data.rotinasTreino).map(([id, v]) => ({...v, idRotina: id})) : [];
 
-    // Faz a varredura e instancia os treinos de hoje caso existam mudanças no banco de dados
     verificarEInstanciarRotinasDoDia();
     renderizar();
 });
 
 window.vincularTreinosSelecionados = () => {
-    const nomeAluna = document.getElementById('select-aluna-vinculo').value;
+    const selecionadasAlunas = Array.from(document.querySelectorAll('.check-aluna:checked')).map(cb => cb.dataset.nome);
     const tipoDesignar = document.getElementById('tipo-designar')?.value || 'unico';
     const selecionados = document.querySelectorAll('.check-exercicio:checked');
 
-    if (!nomeAluna || selecionados.length === 0) {
-        return alert("Por favor, selecione a aluna e os exercícios!");
+    if (selecionadasAlunas.length === 0) {
+        return alert("Por favor, selecione ao menos uma aluna!");
+    }
+    if (selecionados.length === 0) {
+        return alert("Por favor, selecione os exercícios!");
     }
 
-    // --- MODO 1: TREINO ÚNICO (POR DATA) ---
     if (tipoDesignar === 'unico') {
         const dataSelecionada = document.getElementById('data-treino-vinculo').value;
         if (!dataSelecionada) {
@@ -793,53 +791,13 @@ window.vincularTreinosSelecionados = () => {
 
         const [ano, mes, dia] = dataSelecionada.split('-'); 
         const dataFormatada = `${dia}/${mes}/${ano}`;
-        const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
 
-        let maiorOrdem = 0; 
-        exerciciosExistentes.forEach(e => { 
-            if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
-        });
-
-        selecionados.forEach((cb, index) => {
-            const id = cb.dataset.id; 
-            const ex = biblioteca.find(e => e.id === id);
-
-            const containerItem = cb.closest('.item-selecao');
-            const inputSeries = containerItem.querySelector(`#series-${id}`);
-            const inputReps = containerItem.querySelector(`#reps-${id}`);
-
-            const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
-            const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
-            const stringDetalhes = `${seriesFinal}x${repsFinal}`;
-
-            push(ref(db, 'treinosDesignados/'), {
-                ...ex, 
-                aluna: nomeAluna, 
-                iniciado: false, 
-                concluido: false, 
-                dataProgramada: dataFormatada, 
-                ordem: maiorOrdem + index + 1,
-                detalhes: stringDetalhes,
-                idTreinador: usuarioLogado
-            });
-        });
-
-        alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
-    } 
-
-    // --- MODO 2: DESIGNAR ROTINA (DIAS DA SEMANA) ---
-    else if (tipoDesignar === 'rotina') {
-        const diasMarcados = Array.from(document.querySelectorAll('input[name="dias-rotina"]:checked'))
-            .map(cb => cb.value);
-
-        if (diasMarcados.length === 0) {
-            return alert("Por favor, selecione ao menos um dia da semana para a rotina!");
-        }
-
-        diasMarcados.forEach(dia => {
-            const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(dia));
+        selecionadasAlunas.forEach(nomeAluna => {
+            const exerciciosExistentes = treinosDesignados.filter(t => t.aluna === nomeAluna && t.dataProgramada === dataFormatada);
             let maiorOrdem = 0; 
-            rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
+            exerciciosExistentes.forEach(e => { 
+                if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; 
+            });
 
             selecionados.forEach((cb, index) => {
                 const id = cb.dataset.id; 
@@ -853,13 +811,55 @@ window.vincularTreinosSelecionados = () => {
                 const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
                 const stringDetalhes = `${seriesFinal}x${repsFinal}`;
 
-                push(ref(db, 'rotinasTreino/'), {
+                push(ref(db, 'treinosDesignados/'), {
                     ...ex, 
                     aluna: nomeAluna, 
-                    diaSemana: dia, 
+                    iniciado: false, 
+                    concluido: false, 
+                    dataProgramada: dataFormatada, 
                     ordem: maiorOrdem + index + 1,
                     detalhes: stringDetalhes,
                     idTreinador: usuarioLogado
+                });
+            });
+        });
+
+        alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
+    } 
+    else if (tipoDesignar === 'rotina') {
+        const diasMarcados = Array.from(document.querySelectorAll('input[name="dias-rotina"]:checked'))
+            .map(cb => cb.value);
+
+        if (diasMarcados.length === 0) {
+            return alert("Por favor, selecione ao menos um dia da semana para a rotina!");
+        }
+
+        selecionadasAlunas.forEach(nomeAluna => {
+            diasMarcados.forEach(dia => {
+                const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(dia));
+                let maiorOrdem = 0; 
+                rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
+
+                selecionados.forEach((cb, index) => {
+                    const id = cb.dataset.id; 
+                    const ex = biblioteca.find(e => e.id === id);
+
+                    const containerItem = cb.closest('.item-selecao');
+                    const inputSeries = containerItem.querySelector(`#series-${id}`);
+                    const inputReps = containerItem.querySelector(`#reps-${id}`);
+
+                    const seriesFinal = inputSeries && inputSeries.value.trim() !== "" ? inputSeries.value.trim() : "3";
+                    const repsFinal = inputReps && inputReps.value.trim() !== "" ? inputReps.value.trim() : "12";
+                    const stringDetalhes = `${seriesFinal}x${repsFinal}`;
+
+                    push(ref(db, 'rotinasTreino/'), {
+                        ...ex, 
+                        aluna: nomeAluna, 
+                        diaSemana: dia, 
+                        ordem: maiorOrdem + index + 1,
+                        detalhes: stringDetalhes,
+                        idTreinador: usuarioLogado
+                    });
                 });
             });
         });
@@ -889,9 +889,14 @@ function renderizar() {
     let alunasDoTreinador = isTreinador ? alunas.filter(a => a.idTreinador === usuarioLogado) : alunas;
 
     if (isTreinador) {
-        const selectVinculo = document.getElementById('select-aluna-vinculo');
-        if (selectVinculo) {
-            selectVinculo.innerHTML = alunasDoTreinador.map(a => `<option value="${a.nome}">${a.nome}</option>`).join('');
+        const containerAlunasSelecao = document.getElementById('container-alunas-selecao');
+        if (containerAlunasSelecao) {
+            containerAlunasSelecao.innerHTML = alunasDoTreinador.map(a => `
+                <div class="item-selecao" style="display: flex; align-items: center; gap: 8px; padding: 4px 0;">
+                    <input type="checkbox" class="check-aluna" data-nome="${a.nome}">
+                    <span style="color: white; flex: 1;">${a.nome}</span>
+                </div>
+            `).join('') || "<div style='color: #aaa;'>Nenhuma aluna vinculada a você.</div>";
         }
 
         const containerFichas = document.getElementById('container-fichas');
