@@ -50,12 +50,9 @@ let passoAtualAnamnese = 1;
 
 let ferramentaAtiva = "timer";
 let timerInterval = null; 
-let cronometroInterval = null; 
-let cronometroTempo = 0;
-let hiitInterval = null; 
-let hiitEstado = "PREPARAR";
-let hiitCiclosRestantes = 0; 
-let hiitTempoRestante = 0;
+let cronometroInterval = null; let cronometroTempo = 0;
+let hiitInterval = null; let hiitEstado = "PREPARAR";
+let hiitCiclosRestantes = 0; let hiitTempoRestante = 0;
 let metronomoInterval = null;
 let metroEstadoCor = false; 
 
@@ -78,6 +75,7 @@ function normalizar(texto) {
     return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
 
+// Remove acentos, cedilhas, traços e padroniza para evitar falhas na comparação de dias da semana
 function normalizarDia(dia) {
     if (!dia) return "";
     return dia.toLowerCase()
@@ -87,6 +85,7 @@ function normalizarDia(dia) {
               .trim();
 }
 
+// Verifica se há rotinas cadastradas para hoje e gera o treino físico da aluna se ainda não existir
 function verificarEInstanciarRotinasDoDia() {
     const alvoCheck = tipoUsuarioLogado === "Aluna" ? usuarioLogado : alunaSelecionadaFluxo;
     if (!alvoCheck) return;
@@ -317,6 +316,8 @@ function entrarNoApp(nome, tipo) {
     alunaSelecionadaFluxo = "";
 
     atualizarEstruturaMenuLateral();
+    
+    // Força a verificação e instanciação do treino de hoje no exato momento em que entra no app
     verificarEInstanciarRotinasDoDia();
 
     if(tipo === "Admin") {
@@ -703,6 +704,7 @@ window.excluirItem = (pasta, id) => {
 
 window.selecionarAlunaFluxo = (nomeAluna) => { 
     alunaSelecionadaFluxo = nomeAluna; 
+    // Garante a geração da rotina de hoje no momento em que o treinador abre a aluna
     verificarEInstanciarRotinasDoDia();
     renderizar(); 
 };
@@ -768,6 +770,7 @@ onValue(ref(db, '/'), (snapshot) => {
     treinadores = data?.treinadores ? Object.entries(data.treinadores).map(([id, v]) => ({...v, id})) : [];
     rotinasTreino = data?.rotinasTreino ? Object.entries(data.rotinasTreino).map(([id, v]) => ({...v, idRotina: id})) : [];
 
+    // Faz a varredura e instancia os treinos de hoje caso existam mudanças no banco de dados
     verificarEInstanciarRotinasDoDia();
     renderizar();
 });
@@ -781,6 +784,7 @@ window.vincularTreinosSelecionados = () => {
         return alert("Por favor, selecione a aluna e os exercícios!");
     }
 
+    // --- MODO 1: TREINO ÚNICO (POR DATA) ---
     if (tipoDesignar === 'unico') {
         const dataSelecionada = document.getElementById('data-treino-vinculo').value;
         if (!dataSelecionada) {
@@ -822,6 +826,8 @@ window.vincularTreinosSelecionados = () => {
 
         alert(`Treino específico vinculado com sucesso para o dia ${dataFormatada}!`);
     } 
+
+    // --- MODO 2: DESIGNAR ROTINA (DIAS DA SEMANA) ---
     else if (tipoDesignar === 'rotina') {
         const diasMarcados = Array.from(document.querySelectorAll('input[name="dias-rotina"]:checked'))
             .map(cb => cb.value);
