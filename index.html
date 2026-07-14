@@ -285,9 +285,8 @@
                 <div class="card-verde" style="width: 95%; margin: 15px auto; border-radius: 12px;">
                     <h3><i class="fas fa-tasks"></i> Designar Treinos e Rotinas</h3>
                     
-                    <select id="select-aluna-vinculo">
-                        <option value="">Selecione a aluna...</option>
-                    </select>
+                    <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Selecione a(s) Aluna(s):</label>
+                    <div id="container-alunas-selecao" class="lista-multipla" style="max-height: 150px; overflow-y: auto; margin-bottom: 12px; border: 1px solid #444; padding: 10px; border-radius: 8px; background: #1a1a1a;"></div>
 
                     <label style="color: white; font-size: 0.8rem; display: block; margin-top: 10px; margin-bottom: 5px;">Tipo de Designação:</label>
                     <select id="tipo-designar" onchange="document.getElementById('container-treino-unico').style.display = this.value === 'unico' ? 'block' : 'none'; document.getElementById('container-designar-rotina').style.display = this.value === 'rotina' ? 'block' : 'none';" style="background: #1a1a1a; color: white; border: 1px solid #444; border-radius: 8px; padding: 10px; width: 100%; margin-bottom: 12px;">
