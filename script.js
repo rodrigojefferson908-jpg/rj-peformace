@@ -75,6 +75,16 @@ function normalizar(texto) {
     return texto ? texto.toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim() : "";
 }
 
+// Remove acentos, cedilhas, traços e padroniza para evitar falhas na comparação de dias da semana
+function normalizarDia(dia) {
+    if (!dia) return "";
+    return dia.toLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, "")
+              .replace("-feira", "")
+              .trim();
+}
+
 window.toggleMenuLateral = () => {
     const menu = document.getElementById('menu-lateral');
     const overlay = document.getElementById('menu-overlay');
@@ -394,7 +404,7 @@ window.iniciarCronometro = () => {
     cronometroInterval = setInterval(() => {
         cronometroTempo++;
         const m = Math.floor(cronometroTempo / 60);
-        const s = cronoverflowTempo = cronometroTempo % 60;
+        const s = cronometroTempo % 60;
         document.getElementById('cronometro-display').innerText = `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
     }, 1000);
 };
@@ -543,7 +553,7 @@ window.modificarBiblioteca = () => {
 
     if(idEdicaoBiblioteca) {
         update(ref(db, `biblioteca/${idEdicaoBiblioteca}`), { nome, foto, legenda, category, categoria: category }).then(() => {
-            alert("Exercício updated com sucesso!");
+            alert("Exercício atualizado com sucesso!");
             limparFormularioBiblioteca();
             switchTab('dados-treino');
         });
@@ -680,7 +690,7 @@ window.vincularRotinaTreino = () => {
         return alert("Por favor, selecione a aluna, os exercícios e o dia da semana para a rotina!");
     }
 
-    const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && r.diaSemana === diaSemana);
+    const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(diaSemana));
     let maiorOrdem = 0; 
     rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
 
@@ -723,7 +733,8 @@ onValue(ref(db, '/'), (snapshot) => {
         const diasMapa = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
         const diaSemanaTexto = diasMapa[hojeSemanaNum];
 
-        const rotinasHoje = rotinasTreino.filter(r => r.aluna === alvoCheck && r.diaSemana === diaSemanaTexto);
+        // Comparação robusta utilizando normalizarDia para garantir o funcionamento correto de dias como "Terça"
+        const rotinasHoje = rotinasTreino.filter(r => r.aluna === alvoCheck && normalizarDia(r.diaSemana) === normalizarDia(diaSemanaTexto));
         rotinasHoje.forEach(r => {
             const jaInstanciado = treinosDesignados.some(t => t.aluna === alvoCheck && t.dataProgramada === hojeString && t.idRotinaOrigem === r.idRotina);
             if (!jaInstanciado) {
@@ -810,7 +821,7 @@ window.vincularTreinosSelecionados = () => {
         }
 
         diasMarcados.forEach(dia => {
-            const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && r.diaSemana === dia);
+            const rotinasExistentes = rotinasTreino.filter(r => r.aluna === nomeAluna && normalizarDia(r.diaSemana) === normalizarDia(dia));
             let maiorOrdem = 0; 
             rotinasExistentes.forEach(e => { if (e.ordem && e.ordem > maiorOrdem) maiorOrdem = e.ordem; });
 
